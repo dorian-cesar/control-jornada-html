@@ -1,0 +1,258 @@
+<div id="pageUsuarios">
+    <div style="text-align: center;">
+        <h1>Usuarios</h1>
+    </div>
+    <div class="redir margin-left: 30px ">
+        <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
+    </div>
+    <div class="panelCentralTable">
+        <button class="btnCrear" onclick="modalUsuario()">Crear</button>
+
+        <table id="tableUsuarios" style="width: 1280px;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Nivel</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <!-- Modal Insert: Formulario para ingresar un nuevo usuario -->
+    <div class="mdl-overlay" id="crearUsuario-overlay" onclick="closeModal('crearUsuario')"></div>
+    <div class="mdl-content" id="crearUsuario-modal">
+        <h1 class="tituloModal">Crear Usuario</h1>
+        <form onsubmit="" method="post" id="formUsuario">
+            <div class="form-cont">
+                <div class="form-group">
+                    <i>Nombre</i>
+                    <input type="text" name="name" class="entrada" placeholder="Nombre" required />
+                </div>
+                <div class="form-group">
+                    <i>correo:</i>
+                    <input type="text" name="email" class="entrada" placeholder="correo" required />
+                </div>
+                <div class="form-group">
+                    <i>Contraseña:</i>
+                    <input type="password" name="password" class="entrada" required />
+                </div>
+                <div class="form-group">
+                    <i>Nivel:</i>
+                    <select type="text" name="level" class="entrada">
+                        <option value="10">Administrador</option>
+                        <option value="5">Supervisor</option>
+                        <option value="1">Usuario</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal editar vehiculo:-->
+    <div class="mdl-overlay" id="editarUsuario-overlay" onclick="closeModal('editarUsuario')"></div>
+    <div class="mdl-content" id="editarUsuario-modal">
+        <h1 class="tituloModal"><i class="fa fa-user-circle-o"></i> Editar Usuario</h1>
+        <form onsubmit="" method="post" id="formEditUsuario">
+            <div class="form-cont">
+                <div class="form-group">
+                    <input type="number" name="idIn" hidden required />
+                    <div class="form-group">
+                        <i>Nombre</i>
+                        <input type="text" name="name" class="entrada" placeholder="Nombre" required />
+                    </div>
+                    <div class="form-group">
+                        <i>correo:</i>
+                        <input type="text" name="email" class="entrada" placeholder="correo" required />
+                    </div>
+                    <div class="form-group">
+                        <i>Nivel:</i>
+                        <select type="text" name="level" class="entrada" required>
+                            <option value="10">Administrador</option>
+                            <option value="5">Supervisor</option>
+                            <option value="1">Usuario</option>
+                        </select>
+                    </div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    <!--script-->
+    <script>
+
+        //modal crear usuario 
+        async function modalUsuario() {
+            const form = document.getElementById('formUsuario');
+
+            openModal('crearUsuario');
+        }
+        var tableUs;
+        const formCU = document.getElementById("formUsuario");
+        formCU.addEventListener("submit", (e) => {
+            e.preventDefault();
+            if (validarFormularioUsuario()) {
+                api.post("/users", {
+                    name: formCU.name.value,
+                    email: formCU.email.value,
+                    password: formCU.password.value,
+                    level: formCU.level.value,
+
+                })
+                    .then(data => {
+                        closeModal("crearUsuario");
+                        tableUs.ajax.reload();
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        if (error.response) {
+                            switch (error.response.status) {
+                                case 422:
+                                    window.alert("Este Usuario ya existe ")
+                            }
+                        }
+                    })
+            }
+        })
+
+
+        //modal editar usuario 
+        async function modalEditarUs(idIn) {
+            const form = document.getElementById('formEditUsuario');
+            let usuario = await api.get(`/users/${idIn}`)
+                .then(data => {
+                    console.log(data);
+                    return data.data;
+                })
+                .catch(error => {
+                    console.error(error);
+                })
+            form.idIn.value = usuario.id;
+            form.name.value = usuario.name;
+            form.email.value = usuario.email;
+            form.level.value = usuario.level;
+            openModal('editarUsuario')
+
+        } var tableEditUs;
+        const formEditUs = document.getElementById('formEditUsuario');
+        formEditUs.addEventListener("submit", (e) => {
+            e.preventDefault();
+            console.log("a");
+
+            api.put(`/users/${formEditUs.idIn.value}`, {
+                name: formEditUs.name.value,
+                email: formEditUs.email.value,
+                level: formEditUs.level.value
+            })
+                .then(data => {
+                    closeModal("editarUsuario");
+                    tableUs.ajax.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                })
+        }
+        )
+
+        //poblar tabla
+        $(document).ready(function () {
+    tableUs = $("#tableUsuarios").DataTable({
+        "ajax": {
+            "url": "https://dev.wit.la/api/users",
+            "dataSrc": "",
+            "beforeSend": function (xhr) {
+                var token = localStorage.getItem("token");
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        },
+        "columns": [
+            { "data": "id" },
+            { "data": "name" },
+            { "data": "email" },
+            { "data": "level" },
+            {
+                "data": "id", "render": function (data, type, row) {
+                    var botones = [
+                        `<button class='fa fa-pencil btnAccion' onclick='modalEditarUs(${row.id})'></button>`,
+                        `<button class='fa fa-trash btnAccion' onclick='eliminarUsuario(${row.id}, "${row.name}")'></button>`
+                    ];
+                    return botones.join(' ');
+                }
+            },
+        ],
+        "language": {
+            //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+        }
+    });
+});
+
+function eliminarUsuario(id, name) {
+    if (confirm(`¿Está seguro que desea eliminar el usuario ${name}?`)) {
+        var token = localStorage.getItem("token");
+        $.ajax({
+            url: `https://dev.wit.la/api/users/${id}`,
+            type: 'DELETE',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            },
+            success: function (result) {
+                alert('Usuario eliminado exitosamente.');
+                tableUs.ajax.reload();  // Recargar la tabla de datos
+            },
+            error: function (xhr, status, error) {
+                alert('Ocurrió un error al eliminar el usuario: ' + error);
+            }
+        });
+    }
+}
+
+        /*function eliminarUsuario(id) {
+            if (confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
+                console.log(`Intentando eliminar el usuario con id: ${id}`); // Log de depuración
+                $.ajax({
+                    url: `https://dev.wit.la/api/users/${id}`,
+                    type: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem("token")
+                    },
+                    success: function (response) {
+                        console.log('Respuesta del servidor:', response); // Log de depuración
+                        tableUs.ajax.reload();
+                        alert("Usuario eliminado correctamente");
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error); // Log de depuración
+                        console.error('Estado:', status); // Log de depuración
+                        console.error('Respuesta del servidor:', xhr.responseText); // Log de depuración
+                        alert("Error al intentar eliminar el usuario");
+                    }
+                });
+            }
+        }*/
+
+
+
+        function validarFormularioUsuario() {
+            var name = formCU.name.value;
+            var email = formCU.email.value;
+            var password = formCU.password.value;
+            var level = formCU.level.value;
+            // Validación de campos obligatorios
+            if (name === "" || email === "" || password === "" || level === "") {
+                alert("Todos los campos son obligatorios");
+                return false;
+            }
+            // Si la validación pasa, se puede enviar el formulario
+            return true;
+        }
+
+    </script>
+</div>

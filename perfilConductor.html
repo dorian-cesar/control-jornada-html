@@ -1,0 +1,451 @@
+<style>
+    .accionContainer {
+        display: flex;
+        gap: 3px;
+        
+        justify-content: center;
+        
+        align-items: center;
+        
+    }
+
+    .accionContainer .btnAccion {
+        display: inline-block;
+    }
+</style>
+
+<div id="pagePerfilConductor">
+    <div style="text-align: center;">
+        <h1>Perfil de Conductores</h1>
+    </div>
+    <div class="redir margin-left: 30px ">
+        <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
+    </div>
+    <div class="panelCentralTable">
+        <button class="btnCrear" onclick="modalConductor()">Crear</button>
+
+        <table id="tableConductores" style="width: 1280px;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Rut</th>
+                    <th>Nombre</th>
+                    <th>Tarjeta</th>
+                    <th>Empresa</th>
+                    <th>Vehiculo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <!-- Modal Insert: Formulario para ingresar un conductor -->
+    <div class="mdl-overlay" id="crearConductor-overlay" onclick="closeModal('crearConductor')"></div>
+    <div class="mdl-content" id="crearConductor-modal">
+        <h1 class="tituloModal">Crear Conductor</h1>
+        <form onsubmit="" method="post" id="formConductor">
+            <div class="form-cont">
+                <div class="form-group">
+                    <i>Nombre</i>
+                    <input type="text" name="nombre" class="entrada" placeholder="Nombre" required />
+                </div>
+                <div class="form-group">
+                    <i>rut:</i>
+                    <input type="text" name="rut" class="entrada" placeholder="rut" required />
+                </div>
+                <div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal editar vehiculo:-->
+    <div class="mdl-overlay" id="editarVehiculo-overlay" onclick="closeModal('editarVehiculo')"></div>
+    <div class="mdl-content" id="editarVehiculo-modal">
+        <h1 class="tituloModal"><i class="fa fa-bus"></i> Editar vehiculo</h1>
+        <form onsubmit="" method="post" id="formVehiculo">
+            <div class="form-cont">
+                <div class="form-group">
+                    <input type="number" name="idIn" hidden />
+                    <i>Patente</i>
+                    <select type="text" id="patente" name="patente" class="entrada" placeholder="xx.xx.xx"> </select>
+                </div>
+                <div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+
+    <!-- Modal editar conductor:-->
+    <div class="mdl-overlay" id="editarConductor-overlay" onclick="closeModal('editarConductor')"></div>
+    <div class="mdl-content" id="editarConductor-modal">
+        <h1 class="tituloModal"><i class="fa fa-bus"></i> Editar Conductor</h1>
+        <form onsubmit="" method="post" id="formCond">
+            <div class="form-cont">
+                <div class="form-group">
+                    <input type="number" name="idIn" hidden />
+                    <i>Conductor</i>
+                    <input type="text" id="conductor" name="conductor" class="entrada" placeholder="Xxxxxx Xxxxx">
+                </div>
+                <div class="form-group">
+                    <i>Rut</i>
+                    <input type="text" id="rut" name="rut" class="entrada" placeholder="xx.xxx.xxx-x">
+                </div>
+                <div class="form-group">
+                    <i>Empresa</i>
+                    <select type="text" id="empresa" name="empresa" class="entrada" placeholder="Empresa"> </select>
+                </div>
+                <div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+<!--script-->
+<script>
+
+   //modal para agregar conductor
+    async function modalConductor(){
+    const form = document.getElementById('formConductor');
+ 
+ 
+        openModal('crearConductor');
+    }
+    var tableCC;
+    const formCC=document.getElementById("formConductor");
+    formCC.addEventListener("submit",(e)=>{
+        e.preventDefault();
+        if(validarCrearConductor()){
+            api.post("/conductores",{
+                rut:formCC.rut.value,
+                nombre:formCC.nombre.value,
+                activo:true,
+            })
+            .then(data=>{
+            closeModal("crearConductor");
+                tableCC.ajax.reload();
+            })
+            .catch(error=>{
+                console.error(error);
+                console.error(error);
+            if(error.response){
+                    switch (error.response.status){
+                        case 422:
+                            window.alert("Este Conductor ya existe");
+                    }
+                }
+            });
+            }
+        
+    })
+
+    //modal para editar vehiculo
+
+    async function modalEditVehiculo(idIn) {
+        const form = document.getElementById('formVehiculo');
+        let conductor = await api.get(`/conductores/${idIn}`)
+            .then(data => {
+                console.log(data[0]);
+                return data.data[0];
+            })
+            .catch(error => {
+                console.error(error);
+            })
+        form.idIn.value = conductor.id;
+        let listPat = await api.get("/vehiculos")
+            .then(data => {
+                return data.data;
+            })
+            .catch(error => {
+                console.error(error);
+            })
+        form.patente.textContent = "";
+        const nullpat = document.createElement("option");
+        nullpat.value = "";
+        nullpat.textContent = "---";
+        form.patente.appendChild(nullpat);
+        listPat.forEach(element => {
+            console.log(element);
+            if (!element.driver || element.driver.id == conductor.id) {
+                if (element.company_id == conductor.company_id) {
+                    const optPat = document.createElement("option");
+                    optPat.value = element.id;
+                    optPat.textContent = element.patente;
+                    form.patente.appendChild(optPat);
+                }
+
+            }
+
+        });
+        if (conductor.vehicle_id) {
+            form.patente.value = conductor.vehicle_id;
+
+        }
+
+
+        openModal('editarVehiculo');
+    }
+    var tableVehi;
+    const formEditVehi = document.getElementById("formVehiculo");
+    formEditVehi.addEventListener("submit", (e) => {
+        e.preventDefault();
+        api.put(`/conductores/${formEditVehi.idIn.value}`, {
+            driver_id: formEditVehi.idIn.value,
+            vehicle_id: formEditVehi.patente.value,
+
+        })
+            .then(data => {
+                closeModal("editarVehiculo");
+                tableCC.ajax.reload();
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+    })
+    // Función para activar o desactivar conductor
+    async function toggleConductor(id, activo) {
+
+        api.put(`/conductores/${id}`, {
+            activo: activo ? 1 : 0
+        })
+            .then(data => {
+                tableCC.ajax.reload();
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+    }
+
+
+
+
+    //modal para editar conductor    
+    async function modalEditCond(idIn) {
+        const form = document.getElementById('formCond');
+        let cond = await api.get(`/conductores/${idIn}`)
+            .then(data => {
+                return data.data[0];
+            })
+            .catch(error => {
+                console.error(error);
+            })
+
+        let condEmp = await api.get(`/empresas`)
+            .then(data => {
+                return data.data;
+            })
+            .catch(error => {
+                console.error(error);
+            })
+        condEmp.forEach(element => {
+            console.log(element);
+            if (!element.company) {
+                const optEditEmp = document.createElement('option');
+                optEditEmp.value = element.id;
+                optEditEmp.textContent = element.nombre;
+                form.empresa.appendChild(optEditEmp);
+            }
+        })
+        form.idIn.value = idIn;
+        form.conductor.value = cond.nombre;
+        form.rut.value = cond.rut;
+
+        openModal('editarConductor');
+    }
+    var tableVehi;
+    var tableCC;
+    const formEditCond = document.getElementById('formCond');
+    formEditCond.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const idIn = formEditCond.idIn.value;
+        if (validarEditarConductor()) {
+            api.put(`/conductores/${idIn}`, {
+                nombre: formEditCond.conductor.value,
+                rut: formEditCond.rut.value,
+                company: formEditCond.empresa.value,
+            })
+                .then(data => {
+                    closeModal("editarConductor");
+                    tableCC.ajax.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    if (error.response) {
+                        switch (error.response.status) {
+                            case 422:
+                                window.alert("Este Conductor ya existe");
+                        }
+                    }
+                });
+        }
+
+
+    })
+
+
+
+    //poblar tablas desde apí
+    // Código para poblar tablas desde la API
+    $(document).ready(function () {
+        tableCC = $("#tableConductores").DataTable({
+            "ajax": {
+                "url": "https://dev.wit.la/api/conductores",
+                "dataSrc": "",
+                "beforeSend": function (xhr) {
+                    var token = localStorage.getItem("token");
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                }
+            },
+            "columns": [
+                { "data": "id" },
+                { "data": "rut" },
+                { "data": "nombre" },
+                {
+                    "data": "smartcard.number",
+                    "render": function (data, type, row) {
+                        return data !== null ? data : 'sin tarjeta';
+                    }
+                },
+                {
+                    "data": "company.nombre",
+                    "render": function (data, type, row) {
+                        return data !== null ? data : 'sin empresa';
+                    }
+                },
+                {
+                    "data": "vehicle",
+                    "render": function (data, type, full, meta) {
+                        return `<button class="btnpatente" onclick='modalEditVehiculo(${full.id})'>${data ? data.patente : 'sin patente'}</button>`;
+                    }
+                },
+                {
+                    "data": "id",
+                    "render": function (data, type, row) {
+                        var botones = `
+                            <div class='accionContainer'>
+                                <button class='fa fa-pencil btnAccion' onclick='modalEditCond(${data}, ${row.activo})'></button>
+                        ${row.activo ?
+                                `<button class="fa fa-eye btnAccion" onclick="toggleConductor(${row.id}, false)"></button>` :
+                                `<button class="fa fa-eye-slash btnAccion" onclick="toggleConductor(${row.id}, true)"></button>`}
+                                <button class="fa fa-trash btnAccion" onclick="eliminarConductor(${data})"></button>
+                            </div>`;
+                        return botones;
+                    }
+                }
+
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                // Agregar clase CSS al elemento de fila según el estado del conductor
+                $(row).addClass(data.activo ? 'activo' : 'inactivo');
+            },
+            "language": {
+                //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+            }
+        });
+    });
+
+    function eliminarConductor(id) {
+        if (confirm('¿Estás seguro de que deseas eliminar este conductor?')) {
+            api.delete(`/conductores/${id}`)
+                .then(data => {
+                    tableCC.ajax.reload();
+                    alert("Registro eliminado correctamente");
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Error al intentar eliminar el registro");
+                });
+        }
+    }
+
+    // Resto del código...
+
+    function validarCrearConductor() {
+        var rut = formCC.rut.value;
+        var nombre = formCC.nombre.value;
+        //agregar validacion para formato de sim cuando este disponible 
+        if (rut === "" || nombre === "") {
+            alert("campo obligatorio");
+            return false;
+        }
+        // Si la validación pasa, se puede enviar el formulario
+        return true;
+    }
+    function validarEditarConductor() {
+        var formEditCond = document.getElementById('formCond');
+        var rut = formEditCond.rut.value;
+        var nombre = formEditCond.conductor.value;
+
+        //agregar validacion para formato de sim cuando este disponible 
+        if (rut === "" || nombre === "") {
+            alert("campo obligatorio");
+            return false;
+        }
+        // Si la validación pasa, se puede enviar el formulario
+        return true;
+    }
+
+    /*function validarRut(rut) {
+    // Expresión regular para validar el formato del RUT
+    var rutRegex = /^0*(\d{1,3}(\.?\d{3})*)\-?([\dkK])$/;
+
+    if (!rut.match(rutRegex)) {
+        // Si el RUT no coincide con el formato esperado, es inválido
+        return false;
+    }
+
+    // Se remueven los puntos y se separa el dígito verificador del cuerpo del RUT
+    var cleanRut = rut.replace(/\./g, '').split('-');
+
+    // Cuerpo del RUT sin el dígito verificador
+    var rutBody = cleanRut[0];
+
+    // Dígito verificador
+    var rutDV = cleanRut[1].toUpperCase();
+
+    // Se calcula el dígito verificador esperado
+    var suma = 0;
+    var multiplo = 2;
+
+    // Se itera desde el último dígito del RUT hacia el primero
+    for (var i = rutBody.length - 1; i >= 0; i--) {
+        suma += parseInt(rutBody.charAt(i)) * multiplo;
+        multiplo = multiplo === 7 ? 2 : multiplo + 1; // Se reinicia el multiplo a 2 después de alcanzar 7
+    }
+
+    // Se calcula el dígito verificador esperado
+    var dvEsperado = 11 - (suma % 11);
+    dvEsperado = dvEsperado === 11 ? 0 : dvEsperado;
+    dvEsperado = dvEsperado === 10 ? 'K' : dvEsperado.toString();
+
+    // Se compara el dígito verificador esperado con el proporcionado
+    return rutDV === dvEsperado;
+
+
+    const rutInput = document.getElementById('rut');
+    const rut = rutInput.value.trim();
+
+    if (validarRut(rut)) {
+    // El RUT es válido, puedes continuar con el proceso
+    // Aquí puedes enviar el formulario o realizar otras acciones necesarias
+    } else {
+    // El RUT no es válido, muestra un mensaje de error o realiza alguna otra acción
+    alert('El RUT ingresado no es válido.');
+    }
+    }*/
+
+
+
+
+
+</script>
+</div>

@@ -1,0 +1,219 @@
+<div id="pageNotificaciones">
+    <div style="text-align: center;">
+        <h1>Notificaciones <i class="fa fa-bell"></i></h1>
+    </div>
+    <div class="redir margin-left: 30px">
+        <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atrás </i>
+    </div>
+    
+    <div class="panelCentralTable">
+        <button class="btnCrear" id="reloadTableBtn">Recargar Tabla</button>
+        <div>
+            <button onclick="exportarCSVNoti()" class="btnsub" > <i class="fa fa-file-text-o"></i> csv</button>
+            <button onclick="excelNoti()" class="btnsub" ><i class="fa fa-file-excel-o"></i> Excel</button>
+            <button onclick="imprimirTablaNoti()"  class="btnsub" ><i class="fa fa-print"></i> Imprimir</button>
+            <button onclick="copiarNoti()" class="btnsub" ><i class="fa fa-files-o"></i> Copiar</button>
+      
+        </div>
+          
+        <table id="tablanoti">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Velocidad</th>
+                    <th>Patente</th>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Función para cargar la tabla de notificaciones
+        function loadNotificationTable() {
+            tablenoti.ajax.reload();
+        }
+
+        // Inicialización de DataTable y configuración de la tabla de notificaciones
+        let tablenoti = $("#tablanoti").DataTable({
+            "ajax": {
+                "url": "https://dev.wit.la/api/alerta",
+                "dataSrc": "",
+                "beforeSend": function (xhr) {
+                    var token = localStorage.getItem("token");
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                }
+            },
+            "columns": [
+                { "data": "id" },
+                { "data": "vehicle_log.velocidad" },
+                { "data": "vehicle_log.vehicle.patente" },
+                {
+                    "data": "vehicle_log.velocidad",
+                    "render": function (data, type, row) {
+                        if (data > 45 && data < 50) {
+                            return 'Informativa';
+                        } else if (data >= 50 && data < 55) {
+                            return 'Advertencia';
+                        } else if (data >= 55) {
+                            return 'Crítica';
+                        }
+                    }
+                },
+                { "data": "formatted_updated_at" }
+            ],
+            "order": [[0, "desc"]], // Ordena la primera columna (ID) de manera descendente
+            "language": {
+               // "url": "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+            }
+        });
+
+
+//funciones para Botones 
+
+        // Agregar evento de clic al botón de recargar tabla
+        $("#reloadTableBtn").click(function () {
+            loadNotificationTable();
+        });
+    });
+    //funcion boton csv 
+    function exportarCSVNoti(){
+        var tabla=document.getElementById("tablanoti");
+        var csv=[];
+        //obtener filas de la tabla 
+        var filas=tabla.rows;
+        //recorrer las filas 
+        for(var i = 0;i < filas.length; i++){
+            var fila=[];
+            var celdas= filas[i].cells;
+            //recorrer las celdas de cada fila 
+            for(var j = 0; j < celdas.length; j++){
+                fila.push(celdas[j].innerText);
+
+            }
+            //agregar la fila al csv 
+            csv.push(fila.join(','));
+        }
+        //crear contenido del archivo csv
+        var csvContenido = csv.join('\n');
+        //crear enlace temporal para descargar el archivo csv
+        var enlaceTemporal= document.createElement('a');
+        enlaceTemporal.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContenido);
+        enlaceTemporal.target = '_blank';
+        enlaceTemporal.download = 'tableNotificaciones.csv';
+        //simular un clic en el enlace temporal 
+        document.body.appendChild(enlaceTemporal);
+        enlaceTemporal.click();
+        document.body.removeChild(enlaceTemporal);
+    }
+    // funcion excel 
+    function excelNoti(){
+        //selecciona la tabla 
+        var tabla = document.getElementById("tablanoti");
+        //crea un objeto de hoja de calculo 
+        var tablaExcel ='<table>';
+        //recorre cada fila de la tabla 
+        for(var i =0; i <tabla.rows.length; i++){
+            tablaExcel += '<tr>';
+                // Recorrer cada celda de la fila
+                for (var j = 0; j < tabla.rows[i].cells.length; j++) {
+                    tablaExcel += '<td>' + tabla.rows[i].cells[j].innerText + '</td>';
+                }
+                tablaExcel += '</tr>';
+        }
+        tablaExcel +='<table>';
+        // crea un enlace temporal
+        var enlaceTemporal=document.createElement('a');
+        enlaceTemporal.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(tablaExcel);
+            enlaceTemporal.download = 'tableNotificaciones.xls';
+
+            // Simular un clic en el enlace temporal
+            document.body.appendChild(enlaceTemporal);
+            enlaceTemporal.click();
+            document.body.removeChild(enlaceTemporal);
+
+    }
+
+    async function imprimirTablaNoti(){
+    //selecciona el contenedor de la tabla 
+    let data =await api.get("/alerta");
+    //Crea un nuevo elemento de ventana de impresion y coloca la tabla dentro 
+    var ventanaImpresion = window.open('','_blank');
+    var tablaNoti=document.createElement("table");
+    tablaNoti.style.width="100%";
+    tablaNoti.style.textAlign="center";
+    tablaNoti.style.border="1px solid black";
+    tablaNoti.style.borderCollapse="collapse";
+    var trOutNoti=document.createElement("tr");
+    var thIdNoti=document.createElement("th");
+    var thVelocidad=document.createElement("th");
+    var thPatente=document.createElement("th");
+    var thTipo=document.createElement("th");
+    var thFecha=document.createElement("th");
+
+    thIdNoti.textContent="ID";
+    thVelocidad.textContent="Velocidad";
+    thPatente.textContent="Patente";
+    thTipo.textContent="Tipo";
+    thFecha.textContent="Fecha";
+
+    trOutNoti.appendChild(thIdNoti);
+    trOutNoti.appendChild(thVelocidad);
+    trOutNoti.appendChild(thPatente);
+    trOutNoti.appendChild(thTipo);
+    trOutNoti.appendChild(thFecha);
+
+    tablaNoti.appendChild(trOutNoti);
+
+    data.data.forEach(element => {
+        var trInNoti=document.createElement("tr");
+        var tdIdNoti=document.createElement("td");
+        var tdVelocidad=document.createElement("td");
+        var tdPatente=document.createElement("td");
+        var tdTipo=document.createElement("td");
+        var tdFecha=document.createElement("td");
+
+        tdIdNoti.textContent=element.id;
+        tdVelocidad.textContent=element.vehicle_log?element.vehicle_log.velocidad:"";
+        tdPatente.textContent=element.vehicle_log&&element.vehicle_log.vehicle?element.vehicle_log.vehicle.patente:"";
+        let speed=element.vehicle_log.velocidad;
+        if (speed > 45 && speed < 50) {
+                            tdTipo.textContent= 'Informativa';
+                        } else if (speed >= 50 && speed < 55) {
+                            tdTipo.textContent= 'Advertencia';
+                        } else if (speed >= 55) {
+                            tdTipo.textContent= 'Crítica';
+                        }
+        tdFecha.textContent=element.formatted_updated_at;
+
+       trInNoti.appendChild(tdIdNoti);
+       trInNoti.appendChild(tdVelocidad);
+       trInNoti.appendChild(tdPatente);
+       trInNoti.appendChild(tdTipo);
+       trInNoti.appendChild(tdFecha);
+       tablaNoti.appendChild(trInNoti);
+    });
+
+    // Imprime la ventana de impresión
+    ventanaImpresion.document.body.appendChild(tablaNoti);
+    ventanaImpresion.print();
+    ventanaImpresion.close();
+}
+function copiarNoti() {
+        var tabla = document.getElementById("tablanoti");
+        var seleccion = window.getSelection();
+        var rango = document.createRange();
+        rango.selectNodeContents(tabla);
+        seleccion.removeAllRanges();
+        seleccion.addRange(rango);
+        document.execCommand("copy");
+        seleccion.removeAllRanges();
+    }
+</script>
+

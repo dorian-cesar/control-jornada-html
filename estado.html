@@ -1,0 +1,70 @@
+<div id="pageEstado">
+    <div style="text-align: center;">
+        <h1>Estado de Conexión</h1>
+    </div>
+    <div class="redir margin-left: 30px">
+        <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atrás </i>
+    </div>
+    <div class="panelCentralTable">
+        <table id="tableEstado">
+            <thead>
+                <tr>
+                    <th>ID Tracker</th>
+                    <th>Patente</th>
+                    <th>Estado</th>
+                    <th>Velocidad</th>
+                    <th>Última Conexión</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        $(document).ready(function(){
+            // Primero, obtenemos los datos de logs
+            $.ajax({
+                url: "https://dev.wit.la/api/logs",
+                beforeSend: function(xhr){
+                    var token = localStorage.getItem("token");
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                },
+                success: function(logsData) {
+                    // Después, obtenemos los datos de última conexión
+                    $.ajax({
+                        url: "https://dev.wit.la/api/wsbuses",
+                        beforeSend: function(xhr){
+                            var token = localStorage.getItem("token");
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                        },
+                        success: function(wsBusesData) {
+                            // Combinamos los datos de ambas fuentes
+                            var combinedData = logsData.map(function(log) {
+                                var bus = wsBusesData.find(function(bus) {
+                                    return bus.patente === log.vehicle.patente;
+                                });
+                                log.ultima_conexion = bus ? bus['ultima-conexion'] : 'N/A';
+                                return log;
+                            });
+
+                            // Inicializamos la tabla DataTable con los datos combinados
+                            $('#tableEstado').DataTable({
+                                data: combinedData,
+                                columns: [
+                                    { data: 'vehicle_id' },
+                                    { data: 'vehicle.patente' },
+                                    { data: 'estado' },
+                                    { data: 'velocidad' },
+                                    { data: 'ultima_conexion' }
+                                ],
+                                language: {
+                                    //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</div>

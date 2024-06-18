@@ -1,0 +1,15 @@
+:root {
+    --main-bg-color: #042940; 
+    --navbar-bg-color: #9FC131; 
+    --sidebar-bg-color: #005C53; 
+    --btn-bg-gradient-start: #DBF227; 
+    --btn-bg-gradient-end: #005C53; /* Naranja más claro */
+    --table-bg-color: #FFDAB9; 
+    --overlay-bg-color: rgba(0, 0, 0, 0.5); /* Negro con transparencia */
+    --modal-bg-color: #042940; 
+    --input-shadow-color: rgba(0, 0, 0, 0.5); /* Negro con transparencia */
+    --sel-info-bg-color: #042940; 
+    --sel-info-border-color: #005C53; 
+    --text-color: white; 
+  }
+/*opcion de paleta de colores*/

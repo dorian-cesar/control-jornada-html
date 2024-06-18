@@ -1,0 +1,62 @@
+<div id="pageMapaInteractivo">
+    <div style="text-align: center;">
+    <h1>Mapa Interactivo <i class="fa fa-map-marker"></i></h1>
+  
+   <section>
+
+    <div class="redir margin-left: 30px " >
+        <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
+    </div>
+    <br>
+        <div class="content-date">
+            <div>
+            <i>Desde:</i>
+            <input type="date" class="sel-map" name="inicio" id="">
+        </div>
+        </br>
+        <div>
+            <i>Hasta:</i>
+            <input type="date" class="sel-map" name="termino" id="">
+        </div>
+        </br>
+        <div>
+            <i>Ubicar: </i>
+            <input type="text" class="sel-map" name="ubicar" id="">
+        <i  class="fa fa-search"></i>
+        </div>
+        </br>
+        <div >
+            <button class="btnmapa" >Recorrido</button>
+            <button class="btnmapa" >Detenciones</button>
+            <button class="btnmapa" >Resumen</button>
+        </div>
+    </div>
+   </section>
+    <aside id="mapIn" ></aside>
+    <script>
+
+        // se crea el objeto mymap con centro y zoom
+        var mymapIn = L.map('mapIn').setView([-33.4652183, -70.6824183], 15);
+
+        // Añadir capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(mymapIn);
+
+        // se genera el icono del bus como marcador
+        var busIcon2 = L.divIcon({
+            className: 'fa-icon , red-icon',
+            html: '<i class="fa fa-bus fa-3x "></i>',
+            iconSize: [50, 50],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30]
+        });
+        // se agrega el marcador al mapa
+        var marker = L.marker([-33.4652183, -70.6824183], { icon: busIcon }).addTo(mymapIn);
+
+        // Añadir un popup al marcador
+        marker.bindPopup("<b>BCBC-12</b>").openPopup();
+    </script>
+
+    </div>
+</div>

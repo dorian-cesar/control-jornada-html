@@ -1,0 +1,535 @@
+<div id="pageTarjetas">
+    <div style="text-align: center;">
+    <h1>Gestión de Tarjetas</h1>
+    </div>
+    <div class="redir margin-left: 30px " >
+        <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
+    </div>
+    <div class="panelCentralTable">
+    <button  class="btnCrear" onclick="modalCrearTarjeta()">Crear Tarjeta</button>
+   
+
+    <div>
+        <button onclick="exportarCSVT()" class="btnsub" > <i class="fa fa-file-text-o"></i> csv</button>
+        <button onclick="excelT()" class="btnsub" ><i class="fa fa-file-excel-o"></i> Excel</button>
+        <button onclick="imprimirTablaT()"  class="btnsub" ><i class="fa fa-print"></i> Imprimir</button>
+        <button onclick="copiarT()" class="btnsub" ><i class="fa fa-files-o"></i> Copiar</button>
+    </div>
+    <table id="tableTarjetas" style="width: 1280px;">
+        <thead>
+            <tr>
+                <th>ID </th>
+                <th>Folio</th>
+                <th >Rut Empleado</th>
+                <th>Nombres</th>
+                <th >Rut Empresa</th>
+                <th >Empresa</th>
+                <th >Fecha de Creacion</th>
+                <th class="no-sort" >Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    </div>
+
+    <!-- Modal: Formulario para asociar tarjetas -->
+    <div class="mdl-overlay" id="ascTarjeta-overlay" onclick="closeModal('ascTarjeta')"></div>
+    <div class="mdl-content" id="ascTarjeta-modal">
+    <h1 class="tituloModal">Asociar Tarjeta <i class="fa fa-id-card-o fa-fw"></i></h1>
+    <form onsubmit="" method="post" id="formAsociarT">
+        <div class="form-cont">
+
+        <div class="form-group">
+            <input type="number" name="idIn" hidden/>
+            <i>Rut:</i>
+            <select type="text" id="rut" name="rut" class="entrada" placeholder="xx.xxx.xxx-x" required></select>
+        </div>
+        <div >
+        <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+        </div>
+        </div>
+    </form>
+
+    </div>
+
+    <!-- Modal Editar-->
+    <div class="mdl-overlay" id="editarTarjeta-overlay" onclick="closeModal('editarTarjeta')"></div>
+    <div class="mdl-content" id="editarTarjeta-modal">
+    <h1 class="tituloModal"><i class='fa fa-pencil'></i>editar Tarjeta </h1>
+    <form onsubmit="" method="post" id="formEditar">
+        <div class="form-cont">
+            <input type="number" name="idIn" hidden/>
+        <div class="form-group">
+        <i>Rut:</i>
+         <select  id="rut" name="rut" class="entrada" placeholder="xx.xxx.xxx-x"  ></select>
+        </div>
+        <div >
+            <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+         </div>
+        </div>
+
+    </form>
+
+    </div>
+
+
+      <!--Modal Crear tarjeta:-->
+      <div class="mdl-overlay" id="crearTarjeta-overlay" onclick="closeModal('crearTarjeta')"></div>
+      <div class="mdl-content" id="crearTarjeta-modal">
+      <h1 class="tituloModal">Crear Tarjeta</h1>
+      <form onsubmit="" method="post" id="formCrearTarjeta">
+          <div class="form-cont">
+           <div class="form-group">
+               <i>folio tarjeta:</i>
+               <input type="text" name="nTarjeta" id="nTarjeta" class="entrada" placeholder="xxxxxxxxxx" >
+           </div>
+           <div >
+              <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+              </div>
+          </div>
+          </form>
+      </div>
+</div>
+
+<script>
+
+
+
+      //modal para crear tarjeta
+      async function modalCrearTarjeta(){
+        const form = document.getElementById('formCrearTarjeta');
+        openModal('crearTarjeta'); 
+        }
+        var tableCTar;
+        const formCTar=document.getElementById('formCrearTarjeta');
+        formCTar.addEventListener("submit",(e)=>{
+            e.preventDefault();
+            if(validarCrearTarjeta()){
+                api.post("/smartcards",{
+                    number:formCTar.nTarjeta.value,
+            })
+       
+            .then(data=>{
+                closeModal('crearTarjeta');
+                tableTar.ajax.reload();
+            })
+            .catch(error=>{
+                console.error(error);
+                if(error.response){
+                    switch (error.response.status){
+                        case 422:
+                            window.alert("Esta tarjeta ya existe");
+                    }
+                }
+        
+            })
+            }
+           
+        })
+
+
+    function validarCrearTarjeta(){
+        var tarjeta = formCTar.nTarjeta.value;
+
+        //agregar validacion para formato de tarjeta cuando este disponible 
+        if (tarjeta === "") {
+        alert("campo obligatorio");
+        return false;
+    }
+    // Si la validación pasa, se puede enviar el formulario
+    return true;
+    }
+
+    //modal para asociar tarjetas
+    async function modalTarjetas(idIn) {
+    const form = document.getElementById('formAsociarT');
+   let tarjetas = await api.get(`/smartcards/${idIn}`)
+    .then(data=>{
+        return data.data[0];
+    })
+    .catch(error=>{
+        console.error(error);
+    })
+    form.idIn.value=tarjetas.id;
+    let cond=await api.get("/conductores")
+    .then(data=>{
+        return data.data;
+    })
+    .catch(error=>{
+        console.error(error);
+    })
+    form.rut.textContent="";
+    const nullpat=document.createElement("option");
+    nullpat.value="";
+    nullpat.textContent="---";
+    form.rut.appendChild(nullpat);
+    cond.forEach(element=>{
+        console.log(element);
+        if(!element.smartcard||element.smartcard.id==tarjetas.id){
+            const optcond=document.createElement("option");
+            optcond.value=element.id;
+            optcond.textContent=element.rut;
+            form.rut.appendChild(optcond)
+        }
+    });
+    openModal('ascTarjeta');
+    }
+    var tableTar;
+        const formTar=document.getElementById("formAsociarT");
+        var rut=formTar.rut.value;
+        formTar.addEventListener("submit",(e)=>{
+            e.preventDefault();
+            if(validarTarjeta()){
+                api.put(`/smartcards/${formTar.idIn.value}`,{
+                    id:formTar.idIn.value,
+                    driver_id:formTar.rut.value,
+            })
+         
+            .then(data=>{
+                closeModal("ascTarjeta");
+                tableTar.ajax.reload();
+            })
+            .catch(error=>{
+                console.error(error);
+                // Verificar el estado de la respuesta para manejar errores específicos
+                if(error.response){
+                    switch (error.response.status){
+                        case 422:
+                            window.alert("Esta Tarjeta ya existe");
+                    }
+                }
+        
+            });
+            }
+            
+        });
+
+    //modal para editar tarjetas
+
+    async function modalEditar(idIn){
+        const form = document.getElementById('formEditar');
+        let tarjeta=await api.get(`/smartcards/${idIn}`)
+        .then(data=>{
+            console.log(data);
+            return data.data[0];
+        
+        })
+        .catch(error=>{
+            console.error(error);
+        })
+        let listCond = await api.get("/conductores")
+        .then(data=>{
+            return data.data;
+        })
+        .catch(error=>{
+            console.error(error);
+        })
+        form.rut.textContent="";
+
+        listCond.forEach(element => {
+        console.log(element);
+        if(!element.smartcard_id||element.smartcard_id==tarjeta.id){
+            const optcond=document.createElement("option");
+            optcond.value=element.id;
+            optcond.textContent=element.rut;
+            form.rut.appendChild(optcond);
+        }
+        
+        
+    });
+    if(tarjeta.driver){
+        console.log(tarjeta);
+    
+        form.rut.value=tarjeta.driver.id;
+        
+    }
+
+    form.idIn.value=tarjeta.id;
+        openModal('editarTarjeta');
+    }    
+    var tableEditTar;
+        const formEditTar=document.getElementById("formEditar");
+        formEditTar.addEventListener("submit",(e)=>{
+            e.preventDefault();
+            api.put(`/smartcards/${formEditTar.idIn.value}`,{
+                driver_id:formEditTar.rut.value,
+
+
+            })
+            .then(data=>{
+                closeModal("editarTarjeta");
+                tableTar.ajax.reload();
+            })
+            .catch(error=>{
+                console.error(error);
+            });
+    
+      
+        })
+
+    //funcion para poblar tablas
+    $(document).ready(function(){
+    tableTar = $("#tableTarjetas").DataTable({
+        "ajax": {
+            "url": "https://dev.wit.la/api/smartcards",
+            "dataSrc": "",
+            "beforeSend": function(xhr) {
+                var token = localStorage.getItem("token");
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        },
+        "columns": [
+            {"data": "id", "render": function(data, type, row) {
+                return " # " + data;
+            }},
+            {"data": "number"},
+            {"data": "driver.rut",
+                "render": function(data, type, full, meta) {
+                    console.log(full);
+                    if (data !== null) {
+                        return `<button class="btnRutCond" onclick='modalTarjetas(${full.id})'>${full.driver.rut}</button>`;
+                    } else {
+                        return `<button class="btnRutCond" onclick='modalTarjetas(${full.id})'>sin conductor</button>`;
+                    }
+                }
+            },
+            {"data": "driver.nombre"},
+            {"data": "driver.company.rut",
+                "render": function(data, type, row) {
+                    if (data !== null) {
+                        return data;
+                    } else {
+                        return 'sin empresa';
+                    }
+                }
+            },
+            {"data": "driver.company.nombre"},
+            {"data": "created_at",
+                "render": function(data, type, row) {
+                    const fecha = data.split("T")[0];
+                    return fecha;
+                }
+            },
+            {"data": "id", "render": function(data, type, row) {
+                var botones = [
+                    `<button class='fa fa-pencil btnAccion' onclick='modalEditar(${data})'></button>`,
+                    `<button class='fa fa-trash btnAccion' onclick='eliminarTarjeta(${data}, "${row.number}")'></button>`
+                ];
+                return botones.join('');
+            }}
+        ],
+        "language": {
+            //"url": "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+        }
+    });
+});
+
+
+
+//funciones para Botones 
+
+    function exportarCSVT() {
+            var tabla = document.getElementById("tableTarjetas");
+            var csv = [];
+
+            // Obtener las filas de la tabla
+            var filas = tabla.rows;
+
+            // Recorrer las filas
+            for (var i = 0; i < filas.length; i++) {
+                var fila = [];
+                var celdas = filas[i].cells;
+
+                // Recorrer las celdas de cada fila
+                for (var j = 0; j < celdas.length; j++) {
+                    fila.push(celdas[j].innerText);
+                }
+
+                // Agregar la fila al CSV
+                csv.push(fila.join(','));
+            }
+
+            // Crear el contenido del archivo CSV
+            var csvContenido = csv.join('\n');
+
+            // Crear un enlace temporal para descargar el archivo CSV
+            var enlaceTemporal = document.createElement('a');
+            enlaceTemporal.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContenido);
+            enlaceTemporal.target = '_blank';
+            enlaceTemporal.download = 'tableTarjetas.csv';
+
+            // Simular un clic en el enlace temporal
+            document.body.appendChild(enlaceTemporal);
+            enlaceTemporal.click();
+            document.body.removeChild(enlaceTemporal);
+        }
+ 
+    function excelT() {
+            // Seleccionar la tabla
+            var tabla = document.getElementById("tableTarjetas");
+
+            // Crear un objeto de hoja de cálculo de Excel
+            var tablaExcel = '<table>';
+
+            // Recorrer cada fila de la tabla
+            for (var i = 0; i < tabla.rows.length; i++) {
+                tablaExcel += '<tr>';
+                // Recorrer cada celda de la fila
+                for (var j = 0; j < tabla.rows[i].cells.length; j++) {
+                    tablaExcel += '<td>' + tabla.rows[i].cells[j].innerText + '</td>';
+                }
+                tablaExcel += '</tr>';
+            }
+
+            tablaExcel += '</table>';
+
+            // Crear un enlace temporal
+            var enlaceTemporal = document.createElement('a');
+            enlaceTemporal.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(tablaExcel);
+            enlaceTemporal.download = 'tableTarjetas.xls';
+
+            // Simular un clic en el enlace temporal
+            document.body.appendChild(enlaceTemporal);
+            enlaceTemporal.click();
+            document.body.removeChild(enlaceTemporal);
+    }
+      
+    async function imprimirTablaT() {
+    // Selecciona el contenedor de la tabla
+    let data = await api.get("/smartcards");
+    
+    // Crea un nuevo elemento de ventana de impresión y coloca la tabla dentro de él
+    var ventanaImpresion = window.open('', '_blank');
+    var tablaTar=document.createElement("table");
+    tablaTar.style.width="100%";
+    tablaTar.style.textAlign="center";
+    tablaTar.style.border="1px solid black"
+    tablaTar.style.borderCollapse="collapse";
+    var trOutTar=document.createElement("tr");
+    var thIdTar=document.createElement("th");
+    var thFolio=document.createElement("th");
+    var thRut=document.createElement("th");
+    var thNombre=document.createElement("th");
+    var thRutEmp=document.createElement("th");
+    var thEmpresa=document.createElement("th");
+    var thFecha=document.createElement("th");
+
+
+    thIdTar.textContent="ID";
+    thFolio.textContent="Folio";
+    thRut.textContent="Rut Empleado";
+    thNombre.textContent="Nombre";
+    thRutEmp.textContent="Rut Empresa";
+    thEmpresa.textContent="Empresa";
+    thFecha.textContent="Fecha de Creación";
+
+    trOutTar.appendChild(thIdTar);
+    trOutTar.appendChild(thFolio);
+    trOutTar.appendChild(thRut);
+    trOutTar.appendChild(thNombre);
+    trOutTar.appendChild(thRutEmp);
+    trOutTar.appendChild(thEmpresa);
+    trOutTar.appendChild(thFecha);
+
+    tablaTar.appendChild(trOutTar);
+
+    data.data.forEach(element=>{
+        var trInTar=document.createElement("tr");
+        var tdIdTar=document.createElement("td");
+        var tdFolio=document.createElement("td");
+        var tdRut=document.createElement("td");
+        var tdNombre=document.createElement("td");
+        var tdRutEmp=document.createElement("td");
+        var tdEmp=document.createElement("td");
+        var tdFecha=document.createElement("td");
+        
+        tdIdTar.textContent=element.id;
+        tdFolio.textContent=element.number;
+        tdRut.textContent=element.driver?element.driver.rut:"";
+        tdNombre.textContent=element.driver?element.driver.nombre:"";
+        tdRutEmp.textContent=element.driver&&element.driver.company?element.driver.company.rut:"";
+        tdEmp.textContent=element.driver&&element.driver.company?element.driver.company.nombre:"";;
+        tdFecha.textContent=element.created_at;
+
+        trInTar.appendChild(tdIdTar);
+        trInTar.appendChild(tdFolio);
+        trInTar.appendChild(tdRut);
+        trInTar.appendChild(tdNombre);
+        trInTar.appendChild(tdRutEmp);
+        trInTar.appendChild(tdEmp);
+        trInTar.appendChild(tdFecha);
+        tablaTar.appendChild(trInTar);
+    })
+
+
+
+   // Imprime la ventana de impresión
+   ventanaImpresion.document.body.appendChild(tablaTar);
+    ventanaImpresion.print();
+    ventanaImpresion.close();
+}
+
+      
+        
+    function copiarT() {
+        var tabla = document.getElementById("tableTarjetas");
+        var seleccion = window.getSelection();
+        var rango = document.createRange();
+        rango.selectNodeContents(tabla);
+        seleccion.removeAllRanges();
+        seleccion.addRange(rango);
+        document.execCommand("copy");
+        seleccion.removeAllRanges();
+    }
+
+
+    function validarTarjeta(){
+       
+        var rut =formTar.rut.value;
+
+         // Validación de campos obligatorios
+        if (rut === "" ) {
+            alert("Todos los campos son obligatorios");
+        return false;
+        }
+
+        // Si la validación pasa, se puede enviar el formulario
+        return true;
+    }
+
+    function validarEditarTarjeta(){
+        var rut = document.getElementById('rut').value;
+        var tarjeta = document.getElementById('nTarjeta').value;
+         // Validación de campos obligatorios
+        if (rut === "" || tarjeta === "" ) {
+        alert("Todos los campos son obligatorios");
+        return false;
+        }
+
+        // Si la validación pasa, se puede enviar el formulario
+        return true;
+    }
+
+    function eliminarTarjeta(id, number) {
+    if (confirm(`¿Está seguro que desea eliminar la tarjeta con número ${number}?`)) {
+        var token = localStorage.getItem("token");
+        $.ajax({
+            url: `https://dev.wit.la/api/smartcards/${id}`,
+            type: 'DELETE',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            },
+            success: function(result) {
+                alert('Tarjeta eliminada exitosamente.');
+                tableTar.ajax.reload();  // Recargar la tabla de datos
+            },
+            error: function(xhr, status, error) {
+                alert('Ocurrió un error al eliminar la tarjeta: ' + error);
+            }
+        });
+    }
+}
+</script>
+
+</div>

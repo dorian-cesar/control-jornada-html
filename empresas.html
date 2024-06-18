@@ -1,0 +1,240 @@
+<div id="pageEmpresas">
+    <div style="text-align: center;">
+        <h1>Gestión de Empresas</h1>
+    </div>
+    <div class="redir margin-left: 30px">
+        <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
+    </div>
+    <div class="panelCentralTable">
+        <button class="btnCrear" onclick="modalCrearEmpresa()">Crear Empresa</button>
+
+        <table id="tableEmpresas" style="width: 1280px;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>nombre</th>
+                    <th>rut</th>
+                    <th class="no-sort">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <!--Modal Crear:-->
+    <div class="mdl-overlay" id="crearEmpresa-overlay" onclick="closeModal('crearEmpresa')"></div>
+    <div class="mdl-content" id="crearEmpresa-modal">
+        <h1 class="tituloModal">Crear Empresa</h1>
+        <form method="post" id="formCrearEmpresa">
+            <div class="form-cont">
+                <div class="form-group">
+                    <i>nombre</i>
+                    <input type="text" name="nombre" id="nombre" class="entrada" placeholder="xx.xx.xx">
+                </div>
+                <div class="form-group">
+                    <i>rut</i>
+                    <input type="text" id="rut" name="rut" class="entrada">
+                </div>
+                <div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal Editar-->
+    <div class="mdl-overlay" id="editEmp-overlay" onclick="closeModal('editEmp')"></div>
+    <div class="mdl-content" id="editEmp-modal">
+        <h1 class="tituloModal"><i class='fa fa-pencil'></i> Editar Empresa</h1>
+        <form method="post" id="formEditEmp">
+            <div class="form-cont">
+                <input type="number" name="idIn" hidden />
+                <div class="form-group">
+                    <i>nombre</i>
+                    <input type="text" name="nombre" id="nombre" class="entrada" placeholder="xx.xx.xx">
+                </div>
+                <div class="form-group">
+                    <i>rut</i>
+                    <input type="text" id="rut" name="rut" class="entrada">
+                </div>
+                <div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Función para crear empresa 
+    async function modalCrearEmpresa() {
+        const form = document.getElementById('formCrearEmpresa');
+        openModal('crearEmpresa');
+    }
+
+    var tableEmp;
+    const formEmp = document.getElementById("formCrearEmpresa");
+    formEmp.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        if (validarCrearEmpresa()) {
+            api.post(`empresas`, {
+                nombre: formEmp.nombre.value,
+                rut: formEmp.rut.value,
+                estado: true,
+            })
+            .then(data => {
+                closeModal('crearEmpresa');
+                tableEmp.ajax.reload();
+            })
+            .catch(error => {
+                console.error(error);
+                if (error.response) {
+                    switch (error.response.status) {
+                        case 422:
+                            window.alert("Esta Empresa ya existe");
+                    }
+                }
+            });
+        }
+    });
+
+    // Función para editar empresa
+    async function modalEditarEmp(idIn) {
+        const form = document.getElementById('formEditEmp');
+        let emp = await api.get(`/empresas/${idIn}`)
+            .then(data => {
+                return data.data[0];
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        form.idIn.value = idIn;
+        form.nombre.value = emp.nombre;
+        form.rut.value = emp.rut;
+        openModal('editEmp');
+    }
+
+    const formEditEmp = document.getElementById('formEditEmp');
+    formEditEmp.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const idIn = formEditEmp.idIn.value;
+
+        if (validarEditarEmpresa()) {
+            api.put(`/empresas/${idIn}`, {
+                nombre: formEditEmp.nombre.value,
+                rut: formEditEmp.rut.value,
+            })
+            .then(data => {
+                closeModal("editEmp");
+                tableEmp.ajax.reload();
+            })
+            .catch(error => {
+                console.error(error);
+                if (error.response) {
+                    switch (error.response.status) {
+                        case 422:
+                            window.alert("Esta Empresa ya existe");
+                    }
+                }
+            });
+        }
+    });
+
+    // Función para activar o desactivar empresa
+    async function toggleEmpresas(id, estado) {
+        const estadoNumero = estado ? 1 : 0;
+
+        api.put(`/empresas/${id}`, {
+            estado: estadoNumero,
+        })
+        .then(data => {
+            tableEmp.ajax.reload();
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    }
+
+    // Poblar tablas
+    $(document).ready(function () {
+        tableEmp = $("#tableEmpresas").DataTable({
+            "ajax": {
+                "url": "https://dev.wit.la/api/empresas",
+                "dataSrc": "",
+                "beforeSend": function (xhr) {
+                    var token = localStorage.getItem("token");
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                }
+            },
+            "columns": [
+                { "data": "id" },
+                { "data": "nombre" },
+                { "data": "rut" },
+                {
+                    "data": "id", "render": function (data, type, row) {
+                        var botones = [`<button class='fa fa-pencil btnAccionEmp' onclick='modalEditarEmp(${data})'></button>`];
+                        if (row.estado) {
+                            botones.push(`<button class="fa fa-eye btnAccionEmp" onclick="toggleEmpresas(${row.id}, false)"></button>`);
+                            botones.push(`<button class='fa fa-trash btnAccion' onclick='eliminarRegistro(${data})'></button>`);
+                        } else {
+                            botones.push(`<button class="fa fa-eye-slash btnAccionEmp" onclick="toggleEmpresas(${row.id}, true)"></button>`);
+                        }
+                        return botones.join('');
+                    }
+                },
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                if (!data.estado) {
+                    $(row).addClass('inactivo');
+                } else {
+                    $(row).addClass('activo');
+                }
+            },
+            "language": {
+                //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+            }
+        });
+    });
+
+    function validarCrearEmpresa() {
+        var nombre = formEmp.nombre.value;
+        var rut = formEmp.rut.value;
+        if (nombre === "" || rut === "") {
+            alert("Todos los campos son obligatorios");
+            return false;
+        }
+        return true;
+    }
+
+    function validarEditarEmpresa() {
+        var nombre = formEditEmp.nombre.value;
+        var rut = formEditEmp.rut.value;
+        if (nombre === "" || rut === "") {
+            alert("Todos los campos son obligatorios");
+            return false;
+        }
+        return true;
+    }
+
+    function eliminarRegistro(id) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta empresa?')) {
+            $.ajax({
+                url: `https://dev.wit.la/api/empresas/${id}`,
+                type: 'DELETE',
+                beforeSend: function (xhr) {
+                    var token = localStorage.getItem("token");
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                },
+                success: function (data) {
+                    tableEmp.ajax.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error al eliminar empresa:', error);
+                    alert('Error al eliminar empresa.');
+                }
+            });
+        }
+    }
+</script>

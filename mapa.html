@@ -1,0 +1,219 @@
+<div id="pageMapa" >
+    <div style="text-align: center;">
+    <h1>Ubicacion del Movil <i class="fa fa-globe"></i></h1>
+    <div style="display: flex; flex-direction: row;">
+    <section style="flex: 0 0 20%;">
+        <div class="redir">
+            <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
+        </div>
+        <br> 
+        <div>
+            <div style="text-align: left;">
+            <input onchange="searchTable()" type="text" id="inputBusqueda" placeholder="Buscar Patente  ">
+            </div>   
+
+            <br> 
+        <table id="tablePatente">
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Velocidad</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tmapabody">
+                    <!-- Aquí se llenarán los datos dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <div id="map" style="flex: 0 0 60%;"></div>
+</div>
+
+<script>
+    // Poblar tabla
+    var userHash = null;
+    var buses = null;
+    var markers = [];
+    var trackers = null;
+
+    $(document).ready(function () {
+        // Realiza la solicitud AJAX para obtener los datos de los vehículos
+        userHash = getUserHash();
+        var tbody = document.getElementById("tmapabody");
+
+        getBuses()
+            .then(reply => {
+                buses = reply;
+                buses.forEach(element => {
+                    var coord = [element.lat, element.lng];
+                    var marker = L.marker(coord, {
+                        icon: busIcon,
+                        autoPan: false,
+                        autoPanOnFocus: false
+                    }).addTo(mymap);
+                    marker.bindPopup(
+                        `<p style="text-align:center">${element.patente}<br>${element.speed}km/h</p>`
+                    );
+
+                    marker.id = element.source_id;
+                    marker.vehid = element.id;
+                    marker.patente = element.patente;
+                    marker.speed = element.speed;
+                    marker.moverstatus = element.movement_status;
+
+                    markers.push(marker);
+                    var trBus = document.createElement("tr");
+                    trBus.id = "tmapaR" + marker.id;
+                    trBus.onclick = function () { goToMarker(marker.id); }; // Asigna la función goToMarker al evento onclick
+                    var tdPatente = document.createElement("td");
+                    var tdVelocidad = document.createElement("td");
+                    var tdEstado = document.createElement("td");
+
+                    tdPatente.textContent = element.patente;
+                    tdVelocidad.textContent = element.speed;
+                    tdEstado.textContent = element.movement_status;
+                    trBus.appendChild(tdPatente);
+                    trBus.appendChild(tdVelocidad);
+                    trBus.appendChild(tdEstado);
+                    tbody.appendChild(trBus);
+                });
+
+                getUserHash()
+                    .then(hash => {
+                        userHash = hash;
+                        trackers = buses.map(item => item.id);
+                        var socket = new WebSocket("wss://masgps.witservices.io/api-v2/event/subscription");
+                        let message = { "action": "subscribe", "hash": userHash, "events": ["state"], "trackers": trackers };
+                        socket.onopen = (e) => {
+                            socket.send(JSON.stringify(message));
+                        };
+                        socket.onmessage = (event) => {
+                            const datos = JSON.parse(event.data);
+                            var marker = markers.find(x => x.id == datos.data.source_id);
+                            if (marker) {
+                                var coord = [datos.data.gps.location.lat, datos.data.gps.location.lng]
+                                marker.setLatLng(coord);
+                                marker.moverstatus = datos.data.movement_status;
+                                marker.speed = datos.data.gps.speed;
+                                marker.setPopupContent(
+                                    `<p style="text-align:center">${marker.patente}<br>${marker.speed}km/h</p>`
+                                );
+
+                                var trData = document.getElementById("tmapaR" + marker.id);
+                                trData.innerHTML = "";
+                                trData.onclick = function () { goToMarker(marker.id); }; // Asigna la función goToMarker al evento onclick
+                                var tdPatente = document.createElement("td");
+                                var tdVelocidad = document.createElement("td");
+                                var tdEstado = document.createElement("td");
+
+                                tdPatente.textContent = marker.patente;
+                                tdVelocidad.textContent = marker.speed;
+                                tdEstado.textContent = marker.moverstatus;
+                                trData.appendChild(tdPatente);
+                                trData.appendChild(tdVelocidad);
+                                trData.appendChild(tdEstado);
+
+                                // Control de notificaciones 
+                                var notiArea = document.getElementById('notificationModal');
+                                var noti = document.getElementById("notificationMessage");
+                                if (noti) {
+                                    if (marker.speed > 45) {
+                                        notiArea.style.display="block";
+                                        setTimeout(()=>{
+                                            notiArea.style.display="none"
+                                        },6000)
+                                        noti.textContent = "Informativa " + marker.patente + " " + marker.speed + "Km/h";
+                                        var notiIcon = document.getElementById("notificationIcon");
+                                        notiIcon.style.color = "rgb(250, 205, 120)";
+                                        if (marker.speed > 55) {
+                                            notiIcon.style.color = "orangered";
+                                            noti.textContent = "¡Crítica! " + marker.patente + " " + marker.speed + "Km/h";
+                                        } else if (marker.speed > 50) {
+                                            notiIcon.style.color = "orange";
+                                            noti.textContent = "Advertencia " + marker.patente + " " + marker.speed + "Km/h";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+            });
+
+    });
+
+    if (userHash && buses) {
+
+    }
+
+
+
+
+function goToMarker(idIn){
+    var marker=markers.find(x=>x.id==idIn);
+    console.log("lala");
+    if(marker){
+        mymap.panTo(marker.getLatLng(),{animate:false});
+        marker.openPopup();
+    }
+
+}
+
+    
+
+        // se crea el objeto mymap con centro y zoom
+        var mymap = L.map('map').setView([-33.4652183, -70.6824183], 15);
+
+        // Añadir capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(mymap);
+
+        // se genera el icono del bus como marcador
+        var busIcon = L.divIcon({
+            className: ' map-icon',
+            html: '<i class="fa fa-bus fa-3x "></i>',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+            popupAnchor: [20, -30]
+        });
+
+
+        async function getUserHash(){
+            let data = await api.get("/wshash");
+            return data.data.hash;
+        }
+        async function getBuses(){
+            let data = await api.get("/wsbuses");
+            return data.data;
+        }
+   
+        function searchTable() {
+        
+        var input = document.getElementById("inputBusqueda").value.toUpperCase();
+        var rows = document.querySelectorAll("#tmapabody tr");
+        if(input.length==0){
+        rows.forEach(row=>{
+            row.style.display="";
+        })
+        }else{
+        rows.forEach(row => {
+        var patente = row.querySelector("td:first-child").textContent.toUpperCase();
+        if (patente.includes(input)) {
+            row.style.display = "";
+        } else {
+            var patenteNum = patente.replace(/\D/g,''); // Extrae solo los números de la patente
+            if (patenteNum.includes(input)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    });  
+    }
+   
+}
+        
+    </script>
+
+</div>

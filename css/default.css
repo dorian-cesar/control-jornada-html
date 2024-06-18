@@ -1,0 +1,18 @@
+:root {
+    --main-bg-color: #1d4355;
+    --navbar-bg-color: #289DD2;
+    --sidebar-bg-color: #072634;
+    --btn-bg-gradient-start: rgba(0,74,173,1);
+    --btn-bg-gradient-end: rgba(65,193,186,1);
+    --table-bg-color: #1d4355;;
+    --overlay-bg-color: rgba(0, 0, 0, 0.5);
+    --modal-bg-color: #1d4355;
+    --input-shadow-color: rgba(0, 0, 0, 0.5);
+    --sel-info-bg-color: #1d4355;
+    --sel-info-border-color: #41c1ba;
+    --text-color: white;
+    --dataTableStyle: #bebebe;
+  }
+
+    
+

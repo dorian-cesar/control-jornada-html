@@ -1,0 +1,184 @@
+<div id="pageAlertas" >
+    <div style="text-align: center;" >
+    <h1>Alertas y Notificaciones</h1>
+    </div>
+    <div class="redir margin-left: 30px " >
+        <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
+    </div>
+    <div class="panelCentralTable">
+        <div>
+            <button onclick="exportarCSVAlert()" class="btnsub" ><i class="fa fa-file-text-o"></i> csv</button>
+            <button onclick="excelAlert()" class="btnsub" ><i class="fa fa-file-excel-o"></i> Excel</button>
+            <button onclick="imprimirTablaAlert()" class="btnsub" ><i class="fa fa-print"></i> Imprimir</button>
+            <button onclick="copiarAlert()" class="btnsub" ><i class="fa fa-files-o"></i> Copiar</button>
+        </div>
+    <table id="tableAlertas" style="width: 1280px;">
+        <thead>
+            <tr>
+                <th>Ambito</th>
+                <th>Regla</th>
+                <th>Severidad</th>
+                <th>Estado</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Velocidad</td>
+                <td>>45 km/h</td>
+                <td style="background-color: rgb(250, 205, 120); color: black;">Informativa</td>    
+                <td>Activa</td>
+            </tr>
+            <tr>
+                <td>Velocidad</td>
+                <td>>50 km/h</td>
+                <td style="background-color: orange;color: black">Advertencia</td>    
+                <td>Activa</td>
+            </tr>
+            <tr>
+                <td>Velocidad</td>
+                <td>>55 km/h</td>
+                <td style="background-color: orangered;color: black">Critica</td>    
+                <td>Activa</td>
+            </tr>
+
+
+        </tbody>
+    </table>
+    
+    <button  class="btnCrear"  onclick="modalAlerta()">Crear Alerta</button>
+    <!-- Modal Insert: Formulario para ingresar una nueva Alerta -->
+    <div class="mdl-overlay" id="crearAlert-overlay" onclick="closeModal('crearAlert')"></div>
+    <div class="mdl-content" id="crearAlert-modal">
+    <h1 class="tituloModal">Crear Alerta <i class="fa fa-bell" ></i></h1>
+    <form onsubmit="" method="post" id="formAlert">
+        <div class="form-cont">
+        <div class="form-group">
+            <i>Ambito</i>
+            <input type="text" name="nombre" class="entrada" placeholder="Ambito" required/>
+        </div>
+        <div class="form-group">
+            <i>Regla:</i>
+            <input type="text" name="rut" class="entrada" placeholder="Regla" required/>
+        </div>
+        <div class="form-group">
+            <i>Severidad:</i>
+            <input type="text" name="empresa" class="entrada" placeholder="Severidad" required/>
+        </div>
+        <div class="form-group">
+            <i>Tipo de notificacion:</i>
+            <select class="entrada-selAlert" required name="tipo">
+                <option value="">Informativa</option>
+                <option value="">Advertencia</option>
+                <option value="">Critica</option>
+            </select>
+        </div>
+        <div >
+        <div >
+        <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+        </div>
+        </div>
+    </form>
+    </div>
+    </div>
+    <script>
+        async function modalAlerta(){
+        const form = document.getElementById('formAlert');
+
+
+        openModal('crearAlert');
+        }
+
+    
+        function exportarCSVAlert() {
+            var tabla = document.getElementById("tableAlertas");
+            var csv = [];
+
+            // Obtener las filas de la tabla
+            var filas = tabla.rows;
+
+            // Recorrer las filas
+            for (var i = 0; i < filas.length; i++) {
+                var fila = [];
+                var celdas = filas[i].cells;
+
+                // Recorrer las celdas de cada fila
+                for (var j = 0; j < celdas.length; j++) {
+                    fila.push(celdas[j].innerText);
+                }
+
+                // Agregar la fila al CSV
+                csv.push(fila.join(','));
+            }
+
+            // Crear el contenido del archivo CSV
+            var csvContenido = csv.join('\n');
+
+            // Crear un enlace temporal para descargar el archivo CSV
+            var enlaceTemporal = document.createElement('a');
+            enlaceTemporal.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContenido);
+            enlaceTemporal.target = '_blank';
+            enlaceTemporal.download = 'tableEstadoTiempoR.csv';
+
+            // Simular un clic en el enlace temporal
+            document.body.appendChild(enlaceTemporal);
+            enlaceTemporal.click();
+            document.body.removeChild(enlaceTemporal);
+        }
+
+        function excelAlert() {
+            // Seleccionar la tabla
+            var tabla = document.getElementById("tableAlertas");
+
+            // Crear un objeto de hoja de cálculo de Excel
+            var tablaExcel = '<table>';
+
+            // Recorrer cada fila de la tabla
+            for (var i = 0; i < tabla.rows.length; i++) {
+                tablaExcel += '<tr>';
+                // Recorrer cada celda de la fila
+                for (var j = 0; j < tabla.rows[i].cells.length; j++) {
+                    tablaExcel += '<td>' + tabla.rows[i].cells[j].innerText + '</td>';
+                }
+                tablaExcel += '</tr>';
+            }
+
+            tablaExcel += '</table>';
+
+            // Crear un enlace temporal
+            var enlaceTemporal = document.createElement('a');
+            enlaceTemporal.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(tablaExcel);
+            enlaceTemporal.download = 'tableAlertas.xls';
+
+            // Simular un clic en el enlace temporal
+            document.body.appendChild(enlaceTemporal);
+            enlaceTemporal.click();
+            document.body.removeChild(enlaceTemporal);
+        }
+      
+        function imprimirTablaAlert() {
+            // Selecciona el contenedor de la tabla
+            var contenedor = document.getElementById('tableAlertas');
+            // Crea un nuevo elemento de ventana de impresión y coloca la tabla dentro de él
+            var ventanaImpresion = window.open('', '_blank');
+            ventanaImpresion.document.write('<html><head><title>Imprimir Alertas</title></head><body>');
+            ventanaImpresion.document.write(contenedor.innerHTML);
+            ventanaImpresion.document.write('</body></html>');
+            // Imprime la ventana de impresión
+            ventanaImpresion.print();
+            ventanaImpresion.close();
+            
+        }
+        function copiarAlert() {
+        var tabla = document.getElementById("tableAlertas");
+        var seleccion = window.getSelection();
+        var rango = document.createRange();
+        rango.selectNodeContents(tabla);
+        seleccion.removeAllRanges();
+        seleccion.addRange(rango);
+        document.execCommand("copy");
+        seleccion.removeAllRanges();
+        }
+
+    </script>
+</div>
