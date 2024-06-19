@@ -30,9 +30,10 @@
 <script>
     //poblar tabla
     $(document).ready(function(){
+        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
     tableHistAct =$("#tableHistorialAct").DataTable({
         "ajax":{
-            "url":"https://dev.wit.la/api/historial",
+            "url":baseUrl+"historial",
             "dataSrc":"",
             "beforeSend":function(xhr){
                     var token=localStorage.getItem("token");

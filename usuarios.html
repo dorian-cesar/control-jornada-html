@@ -164,55 +164,56 @@
 
         //poblar tabla
         $(document).ready(function () {
-    tableUs = $("#tableUsuarios").DataTable({
-        "ajax": {
-            "url": "https://dev.wit.la/api/users",
-            "dataSrc": "",
-            "beforeSend": function (xhr) {
-                var token = localStorage.getItem("token");
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            }
-        },
-        "columns": [
-            { "data": "id" },
-            { "data": "name" },
-            { "data": "email" },
-            { "data": "level" },
-            {
-                "data": "id", "render": function (data, type, row) {
-                    var botones = [
-                        `<button class='fa fa-pencil btnAccion' onclick='modalEditarUs(${row.id})'></button>`,
-                        `<button class='fa fa-trash btnAccion' onclick='eliminarUsuario(${row.id}, "${row.name}")'></button>`
-                    ];
-                    return botones.join(' ');
+            const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
+            tableUs = $("#tableUsuarios").DataTable({
+                "ajax": {
+                    "url": baseUrl+"users",
+                    "dataSrc": "",
+                    "beforeSend": function (xhr) {
+                        var token = localStorage.getItem("token");
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    }
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "name" },
+                    { "data": "email" },
+                    { "data": "level" },
+                    {
+                        "data": "id", "render": function (data, type, row) {
+                            var botones = [
+                                `<button class='fa fa-pencil btnAccion' onclick='modalEditarUs(${row.id})'></button>`,
+                                `<button class='fa fa-trash btnAccion' onclick='eliminarUsuario(${row.id}, "${row.name}")'></button>`
+                            ];
+                            return botones.join(' ');
+                        }
+                    },
+                ],
+                "language": {
+                    //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
                 }
-            },
-        ],
-        "language": {
-            //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
-        }
-    });
-});
-
-function eliminarUsuario(id, name) {
-    if (confirm(`¿Está seguro que desea eliminar el usuario ${name}?`)) {
-        var token = localStorage.getItem("token");
-        $.ajax({
-            url: `https://dev.wit.la/api/users/${id}`,
-            type: 'DELETE',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            },
-            success: function (result) {
-                alert('Usuario eliminado exitosamente.');
-                tableUs.ajax.reload();  // Recargar la tabla de datos
-            },
-            error: function (xhr, status, error) {
-                alert('Ocurrió un error al eliminar el usuario: ' + error);
-            }
+            });
         });
-    }
-}
+
+        function eliminarUsuario(id, name) {
+            if (confirm(`¿Está seguro que desea eliminar el usuario ${name}?`)) {
+                var token = localStorage.getItem("token");
+                $.ajax({
+                    url: baseUrl+`users/${id}`,
+                    type: 'DELETE',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    },
+                    success: function (result) {
+                        alert('Usuario eliminado exitosamente.');
+                        tableUs.ajax.reload();  // Recargar la tabla de datos
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Ocurrió un error al eliminar el usuario: ' + error);
+                    }
+                });
+            }
+        }
 
         /*function eliminarUsuario(id) {
             if (confirm("¿Estás seguro de que deseas eliminar este usuario?")) {

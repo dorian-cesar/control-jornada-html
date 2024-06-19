@@ -1,11 +1,24 @@
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+ 
+   
+
 <div id="pageEstado">
     <div style="text-align: center;">
         <h1>Estado de Conexión</h1>
     </div>
-    <div class="redir margin-left: 30px">
+    <div class="redir" style="margin-left: 30px;">
         <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atrás </i>
     </div>
     <div class="panelCentralTable">
+        <button class="btnCrear" id="reloadTableBtn">Recargar Tabla</button>
+        <div>
+            <button onclick="exportarCSVNoti()" class="btnsub"> <i class="fa fa-file-text-o"></i> csv</button>
+            <button onclick="excelNoti()" class="btnsub"><i class="fa fa-file-excel-o"></i> Excel</button>
+            <button onclick="exportarPDFNoti()" class="btnsub"><i class="fa fa-file-pdf-o"></i> PDF</button>
+            <button onclick="imprimirTablaNoti()" class="btnsub"><i class="fa fa-print"></i> Imprimir</button>
+            <button onclick="copiarNoti()" class="btnsub"><i class="fa fa-files-o"></i> Copiar</button>
+        </div>
         <table id="tableEstado">
             <thead>
                 <tr>
@@ -20,51 +33,168 @@
             </tbody>
         </table>
     </div>
-    <script>
-        $(document).ready(function(){
-            // Primero, obtenemos los datos de logs
-            $.ajax({
-                url: "https://dev.wit.la/api/logs",
-                beforeSend: function(xhr){
-                    var token = localStorage.getItem("token");
-                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                },
-                success: function(logsData) {
-                    // Después, obtenemos los datos de última conexión
-                    $.ajax({
-                        url: "https://dev.wit.la/api/wsbuses",
-                        beforeSend: function(xhr){
-                            var token = localStorage.getItem("token");
-                            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                        },
-                        success: function(wsBusesData) {
-                            // Combinamos los datos de ambas fuentes
-                            var combinedData = logsData.map(function(log) {
-                                var bus = wsBusesData.find(function(bus) {
-                                    return bus.patente === log.vehicle.patente;
-                                });
-                                log.ultima_conexion = bus ? bus['ultima-conexion'] : 'N/A';
-                                return log;
-                            });
-
-                            // Inicializamos la tabla DataTable con los datos combinados
-                            $('#tableEstado').DataTable({
-                                data: combinedData,
-                                columns: [
-                                    { data: 'vehicle_id' },
-                                    { data: 'vehicle.patente' },
-                                    { data: 'estado' },
-                                    { data: 'velocidad' },
-                                    { data: 'ultima_conexion' }
-                                ],
-                                language: {
-                                    //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        });
-    </script>
 </div>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.17/jspdf.plugin.autotable.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
+        // Primero, obtenemos los datos de logs
+        $.ajax({
+            url: baseUrl+"logs",
+            beforeSend: function (xhr) {
+                var token = localStorage.getItem("token");
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            },
+            success: function (logsData) {
+                // Después, obtenemos los datos de última conexión
+                $.ajax({
+                    url: baseUrl+"wsbuses",
+                    beforeSend: function (xhr) {
+                        var token = localStorage.getItem("token");
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    },
+                    success: function (wsBusesData) {
+                        // Combinamos los datos de ambas fuentes
+                        var combinedData = logsData.map(function (log) {
+                            var bus = wsBusesData.find(function (bus) {
+                                return bus.patente === log.vehicle.patente;
+                            });
+                            log.ultima_conexion = bus ? bus['ultima-conexion'] : 'N/A';
+                            return log;
+                        });
+
+                        // Inicializamos la tabla DataTable con los datos combinados
+                        $('#tableEstado').DataTable({
+                            data: combinedData,
+                            columns: [
+                                { data: 'vehicle_id' },
+                                { data: 'vehicle.patente' },
+                                { data: 'estado' },
+                                { data: 'velocidad' },
+                                { data: 'ultima_conexion' }
+                            ],
+                            language: {
+                                //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        $("#reloadTableBtn").click(function () {
+            location.reload();
+        });
+    });
+
+    // función para exportar CSV
+    function exportarCSVNoti() {
+        var table = $('#tableEstado').DataTable();
+        var csv = [];
+        var rows = table.rows().data().toArray();
+        var header = ["ID Tracker", "Patente", "Estado", "Velocidad", "Última Conexión"];
+        csv.push(header.join(','));
+        rows.forEach(function (row) {
+            csv.push([row.vehicle_id, row.vehicle.patente, row.estado, row.velocidad, row.ultima_conexion].join(','));
+        });
+        var csvContent = csv.join('\n');
+        var link = document.createElement('a');
+        link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+        link.target = '_blank';
+        link.download = 'tableEstado.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // función para exportar Excel
+    function excelNoti() {
+        var table = $('#tableEstado').DataTable();
+        var rows = table.rows().data().toArray();
+        var tableExcel = '<table>';
+        var header = ["ID Tracker", "Patente", "Estado", "Velocidad", "Última Conexión"];
+        tableExcel += '<tr>';
+        header.forEach(function (headerCell) {
+            tableExcel += '<th>' + headerCell + '</th>';
+        });
+        tableExcel += '</tr>';
+        rows.forEach(function (row) {
+            tableExcel += '<tr>';
+            tableExcel += '<td>' + row.vehicle_id + '</td>';
+            tableExcel += '<td>' + row.vehicle.patente + '</td>';
+            tableExcel += '<td>' + row.estado + '</td>';
+            tableExcel += '<td>' + row.velocidad + '</td>';
+            tableExcel += '<td>' + row.ultima_conexion + '</td>';
+            tableExcel += '</tr>';
+        });
+        tableExcel += '</table>';
+        var link = document.createElement('a');
+        link.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(tableExcel);
+        link.download = 'tableEstado.xls';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // función para exportar PDF
+    function exportarPDFNoti() {
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+        var table = $('#tableEstado').DataTable();
+        var rows = table.rows().data().toArray();
+        var columns = ["ID Tracker", "Patente", "Estado", "Velocidad", "Última Conexión"];
+        var data = rows.map(function(row) {
+            return [row.vehicle_id, row.vehicle.patente, row.estado, row.velocidad, row.ultima_conexion];
+        });
+
+        doc.autoTable({
+            head: [columns],
+            body: data,
+        });
+
+        doc.save('tableEstado.pdf');
+    }
+
+    // función para imprimir tabla
+    function imprimirTablaNoti() {
+        var table = $('#tableEstado').DataTable();
+        var rows = table.rows().data().toArray();
+        var printWindow = window.open('', '_blank');
+        var printTable = '<table style="width:100%; text-align:center; border:1px solid black; border-collapse:collapse;">';
+        var header = ["ID Tracker", "Patente", "Estado", "Velocidad", "Última Conexión"];
+        printTable += '<tr>';
+        header.forEach(function (headerCell) {
+            printTable += '<th style="border:1px solid black;">' + headerCell + '</th>';
+        });
+        printTable += '</tr>';
+        rows.forEach(function (row) {
+            printTable += '<tr>';
+            printTable += '<td style="border:1px solid black;">' + row.vehicle_id + '</td>';
+            printTable += '<td style="border:1px solid black;">' + row.vehicle.patente + '</td>';
+            printTable += '<td style="border:1px solid black;">' + row.estado + '</td>';
+            printTable += '<td style="border:1px solid black;">' + row.velocidad + '</td>';
+            printTable += '<td style="border:1px solid black;">' + row.ultima_conexion + '</td>';
+            printTable += '</tr>';
+        });
+        printTable += '</table>';
+        printWindow.document.body.innerHTML = printTable;
+        printWindow.print();
+        printWindow.close();
+    }
+
+    // función para copiar tabla
+    function copiarNoti() {
+        var table = document.getElementById("tableEstado");
+        var selection = window.getSelection();
+        var range = document.createRange();
+        range.selectNodeContents(table);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.execCommand("copy");
+        selection.removeAllRanges();
+    }
+</script>
+

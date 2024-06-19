@@ -270,9 +270,10 @@
 
     //funcion para poblar tablas
     $(document).ready(function(){
+        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
     tableTar = $("#tableTarjetas").DataTable({
         "ajax": {
-            "url": "https://dev.wit.la/api/smartcards",
+            "url": baseUrl+"smartcards",
             "dataSrc": "",
             "beforeSend": function(xhr) {
                 var token = localStorage.getItem("token");

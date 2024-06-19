@@ -37,9 +37,10 @@
 
 <script>
        $(document).ready(function(){
+        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
         var dt = $("#tableEstadoTiempoR").DataTable({
             "ajax":{
-                "url": "https://dev.wit.la/api/logs", 
+                "url": baseUrl+"logs", 
                 "dataSrc":"", 
                 "beforeSend":function(xhr){
                     var token=localStorage.getItem("token");

@@ -2,11 +2,11 @@
     .accionContainer {
         display: flex;
         gap: 3px;
-        
+
         justify-content: center;
-        
+
         align-items: center;
-        
+
     }
 
     .accionContainer .btnAccion {
@@ -111,39 +111,39 @@
 <!--script-->
 <script>
 
-   //modal para agregar conductor
-    async function modalConductor(){
-    const form = document.getElementById('formConductor');
- 
- 
+    //modal para agregar conductor
+    async function modalConductor() {
+        const form = document.getElementById('formConductor');
+
+
         openModal('crearConductor');
     }
     var tableCC;
-    const formCC=document.getElementById("formConductor");
-    formCC.addEventListener("submit",(e)=>{
+    const formCC = document.getElementById("formConductor");
+    formCC.addEventListener("submit", (e) => {
         e.preventDefault();
-        if(validarCrearConductor()){
-            api.post("/conductores",{
-                rut:formCC.rut.value,
-                nombre:formCC.nombre.value,
-                activo:true,
+        if (validarCrearConductor()) {
+            api.post("/conductores", {
+                rut: formCC.rut.value,
+                nombre: formCC.nombre.value,
+                activo: true,
             })
-            .then(data=>{
-            closeModal("crearConductor");
-                tableCC.ajax.reload();
-            })
-            .catch(error=>{
-                console.error(error);
-                console.error(error);
-            if(error.response){
-                    switch (error.response.status){
-                        case 422:
-                            window.alert("Este Conductor ya existe");
+                .then(data => {
+                    closeModal("crearConductor");
+                    tableCC.ajax.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    console.error(error);
+                    if (error.response) {
+                        switch (error.response.status) {
+                            case 422:
+                                window.alert("Este Conductor ya existe");
+                        }
                     }
-                }
-            });
-            }
-        
+                });
+        }
+
     })
 
     //modal para editar vehiculo
@@ -228,16 +228,18 @@
 
 
 
-    //modal para editar conductor    
+    // Modal para editar conductor    
     async function modalEditCond(idIn) {
         const form = document.getElementById('formCond');
+        form.empresa.textContent = ""; // Limpiar opciones anteriores
+
         let cond = await api.get(`/conductores/${idIn}`)
             .then(data => {
                 return data.data[0];
             })
             .catch(error => {
                 console.error(error);
-            })
+            });
 
         let condEmp = await api.get(`/empresas`)
             .then(data => {
@@ -245,22 +247,26 @@
             })
             .catch(error => {
                 console.error(error);
-            })
+            });
+
         condEmp.forEach(element => {
-            console.log(element);
-            if (!element.company) {
-                const optEditEmp = document.createElement('option');
-                optEditEmp.value = element.id;
-                optEditEmp.textContent = element.nombre;
-                form.empresa.appendChild(optEditEmp);
+            const optEditEmp = document.createElement('option');
+            optEditEmp.value = element.id;
+            optEditEmp.textContent = element.nombre;
+            if (cond.company_id === element.id) {
+                optEditEmp.selected = true;
             }
-        })
+            form.empresa.appendChild(optEditEmp);
+        });
+
         form.idIn.value = idIn;
         form.conductor.value = cond.nombre;
         form.rut.value = cond.rut;
 
         openModal('editarConductor');
     }
+
+
     var tableVehi;
     var tableCC;
     const formEditCond = document.getElementById('formCond');
@@ -271,7 +277,7 @@
             api.put(`/conductores/${idIn}`, {
                 nombre: formEditCond.conductor.value,
                 rut: formEditCond.rut.value,
-                company: formEditCond.empresa.value,
+                company_id: formEditCond.empresa.value,
             })
                 .then(data => {
                     closeModal("editarConductor");
@@ -287,18 +293,16 @@
                     }
                 });
         }
+    });
 
 
-    })
-
-
-
-    //poblar tablas desde apí
-    // Código para poblar tablas desde la API
-    $(document).ready(function () {
+   // aqui se defibne parte de la api en una variable
+   
+   $(document).ready(function () {
+        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
         tableCC = $("#tableConductores").DataTable({
             "ajax": {
-                "url": "https://dev.wit.la/api/conductores",
+                "url": baseUrl+"conductores",
                 "dataSrc": "",
                 "beforeSend": function (xhr) {
                     var token = localStorage.getItem("token");

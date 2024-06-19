@@ -159,9 +159,10 @@
 
     // Poblar tablas
     $(document).ready(function () {
+        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
         tableEmp = $("#tableEmpresas").DataTable({
             "ajax": {
-                "url": "https://dev.wit.la/api/empresas",
+                "url": baseUrl+"empresas",
                 "dataSrc": "",
                 "beforeSend": function (xhr) {
                     var token = localStorage.getItem("token");
@@ -221,7 +222,7 @@
     function eliminarRegistro(id) {
         if (confirm('¿Estás seguro de que deseas eliminar esta empresa?')) {
             $.ajax({
-                url: `https://dev.wit.la/api/empresas/${id}`,
+                url: baseUrl+`empresas/${id}`,
                 type: 'DELETE',
                 beforeSend: function (xhr) {
                     var token = localStorage.getItem("token");

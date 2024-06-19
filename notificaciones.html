@@ -35,6 +35,7 @@
 
 <script>
     $(document).ready(function () {
+        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
         // Función para cargar la tabla de notificaciones
         function loadNotificationTable() {
             tablenoti.ajax.reload();
@@ -43,7 +44,7 @@
         // Inicialización de DataTable y configuración de la tabla de notificaciones
         let tablenoti = $("#tablanoti").DataTable({
             "ajax": {
-                "url": "https://dev.wit.la/api/alerta",
+                "url": baseUrl+"alerta",
                 "dataSrc": "",
                 "beforeSend": function (xhr) {
                     var token = localStorage.getItem("token");
