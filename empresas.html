@@ -84,19 +84,19 @@
                 rut: formEmp.rut.value,
                 estado: true,
             })
-            .then(data => {
-                closeModal('crearEmpresa');
-                tableEmp.ajax.reload();
-            })
-            .catch(error => {
-                console.error(error);
-                if (error.response) {
-                    switch (error.response.status) {
-                        case 422:
-                            window.alert("Esta Empresa ya existe");
+                .then(data => {
+                    closeModal('crearEmpresa');
+                    tableEmp.ajax.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    if (error.response) {
+                        switch (error.response.status) {
+                            case 422:
+                                window.alert("Esta Empresa ya existe");
+                        }
                     }
-                }
-            });
+                });
         }
     });
 
@@ -126,19 +126,19 @@
                 nombre: formEditEmp.nombre.value,
                 rut: formEditEmp.rut.value,
             })
-            .then(data => {
-                closeModal("editEmp");
-                tableEmp.ajax.reload();
-            })
-            .catch(error => {
-                console.error(error);
-                if (error.response) {
-                    switch (error.response.status) {
-                        case 422:
-                            window.alert("Esta Empresa ya existe");
+                .then(data => {
+                    closeModal("editEmp");
+                    tableEmp.ajax.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    if (error.response) {
+                        switch (error.response.status) {
+                            case 422:
+                                window.alert("Esta Empresa ya existe");
+                        }
                     }
-                }
-            });
+                });
         }
     });
 
@@ -149,20 +149,21 @@
         api.put(`/empresas/${id}`, {
             estado: estadoNumero,
         })
-        .then(data => {
-            tableEmp.ajax.reload();
-        })
-        .catch(error => {
-            console.error(error);
-        });
+            .then(data => {
+                tableEmp.ajax.reload();
+            })
+            .catch(error => {
+                console.error(error);
+            });
     }
 
     // Poblar tablas
     $(document).ready(function () {
-        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
+        const api = getApi();
+        const baseUrl = api.baseUrl;
         tableEmp = $("#tableEmpresas").DataTable({
             "ajax": {
-                "url": baseUrl+"empresas",
+                "url": baseUrl + "empresas",
                 "dataSrc": "",
                 "beforeSend": function (xhr) {
                     var token = localStorage.getItem("token");
@@ -222,7 +223,7 @@
     function eliminarRegistro(id) {
         if (confirm('¿Estás seguro de que deseas eliminar esta empresa?')) {
             $.ajax({
-                url: baseUrl+`empresas/${id}`,
+                url: baseUrl + `empresas/${id}`,
                 type: 'DELETE',
                 beforeSend: function (xhr) {
                     var token = localStorage.getItem("token");

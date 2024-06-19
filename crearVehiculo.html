@@ -30,7 +30,6 @@
     </div>
 
     <!--Modal Crear:-->
-    <div class="mdl-overlay" id="crearVehiculo-overlay" onclick="closeModal('crearVehiculo')"></div>
     <div class="mdl-content" id="crearVehiculo-modal">
         <h1 class="tituloModal">Crear Vehiculo</h1>
         <form onsubmit="" method="post" id="formCrearVehiculo">
@@ -40,11 +39,17 @@
                     <input type="text" id="patente" name="patente" class="entrada" placeholder="xx.xx.NN">
                 </div>
                 <div class="form-group">
+                    <i>Track ID</i>
+                    <input type="text" id="track_id" name="track_id" class="entrada" placeholder="Track ID">
+                </div>
+                <div class="form-group">
                     <i>Tipo</i>
                     <select type="text" id="tipo" name="tipo" class="entrada"></select>
                 </div>
                 <div>
                     <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                    <button type="button" class="btnCrear" onclick="closeModal('crearVehiculo')"><i
+                            class="fa fa-times"></i> Cancelar</button>
                 </div>
             </div>
         </form>
@@ -62,12 +67,12 @@
                 </div>
                 <div>
                     <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                    <button type="button" class="btnCrear" onclick="closeModal('crearTipo')"><i class="fa fa-times"></i>
+                        Cancelar</button>
                 </div>
             </div>
         </form>
     </div>
-
-
 
     <!-- Modal Editar-->
     <div class="mdl-overlay" id="editVe-overlay" onclick="closeModal('editVe')"></div>
@@ -88,30 +93,46 @@
                     <i>Tipo</i>
                     <select type="text" id="tipo" name="tipo" class="entrada"></select>
                 </div>
+                <div class="form-group">
+                    <i>Empresa</i>
+                    <select type="text" id="empresa" name="empresa" class="entrada"></select>
+                </div>
                 <div>
-                    <div class="form-group">
-                        <i>Empresa</i>
-                        <select type="text" id="empresa" name="empresa" class="entrada"></select>
-                    </div>
-                    <div>
-                        <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
-                    </div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                    <button type="button" class="btnCrear" onclick="closeModal('editVe')"><i class="fa fa-times"></i>
+                        Cancelar</button>
                 </div>
             </div>
         </form>
     </div>
-
-
 </div>
+<script src="variables.js"></script>
 <script>
+    function openModal(modalId) {
+        document.getElementById(modalId + '-modal').style.display = 'block';
+        document.getElementById(modalId + '-overlay').style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId + '-modal').style.display = 'none';
+        document.getElementById(modalId + '-overlay').style.display = 'none';
+    }
+
     //modal para crear vehiculo
     async function modalCrearVehiculo() {
         const form = document.getElementById('formCrearVehiculo');
-        form.tipo.innerHTML = '';  // Limpiar opciones previas
-        let listVeT = await api.get("/tipovehiculos")
-            .then(data => data.data)
-            .catch(error => console.error(error));
+        form.reset(); // Resetea el formulario para evitar datos persistentes
 
+        let listVeT = await api.get("/tipovehiculos")
+            .then(data => {
+                return data.data;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        // Limpia el select antes de agregar nuevas opciones
+        form.tipo.innerHTML = '';
         listVeT.forEach(element => {
             const optTip = document.createElement("option");
             optTip.value = element.id;
@@ -130,28 +151,30 @@
         if (validarFormularioCrearVehiculo()) {
             api.post("/vehiculos", {
                 patente: formCV.patente.value,
+                track_id: formCV.track_id.value,
                 vehicle_type_id: formCV.tipo.value,
                 vehicle_state_id: 1,
             })
-            .then(data => {
-                closeModal("crearVehiculo");
-                tableVe.ajax.reload(null, false);  // Recargar la tabla sin cambiar la página
-            })
-            .catch(error => {
-                console.error(error);
-                if (error.response) {
-                    switch (error.response.status) {
-                        case 422:
-                            window.alert("Este tipo de vehiculo ya existe");
-                            break;
+                .then(data => {
+                    closeModal("crearVehiculo");
+                    tableVe.ajax.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    if (error.response) {
+                        switch (error.response.status) {
+                            case 422:
+                                window.alert("Este tipo de vehiculo ya existe");
+                        }
                     }
-                }
-            });
+                });
         }
     });
 
     //modal para crear Tipo de vehiculo
     async function modalCrearTipo() {
+        const form = document.getElementById('formCrearTipo');
+        form.reset(); // Resetea el formulario para evitar datos persistentes
         openModal('crearTipo');
     }
 
@@ -162,42 +185,50 @@
             api.post("/tipovehiculos", {
                 tipo: formTipo.tipo.value,
             })
-            .then(data => {
-                closeModal('crearTipo');
-                tableVe.ajax.reload(null, false);  // Recargar la tabla sin cambiar la página
-            })
-            .catch(error => {
-                console.error(error);
-                if (error.response) {
-                    switch (error.response.status) {
-                        case 422:
-                            window.alert("Este tipo de vehiculo ya existe");
-                            break;
+                .then(data => {
+                    closeModal('crearTipo');
+                    tableVe.ajax.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    if (error.response) {
+                        switch (error.response.status) {
+                            case 422:
+                                window.alert("Este tipo de vehiculo ya existe");
+                        }
                     }
-                }
-            });
+                });
         }
     });
 
     //Modal para editar
     async function modalEditVe(idIn, patenteIn, trackIdIn) {
         const form = document.getElementById('formEditVe');
-        form.tipo.innerHTML = '';  // Limpiar opciones previas
-        form.empresa.innerHTML = '';  // Limpiar opciones previas
+        form.reset(); // Resetea el formulario para evitar datos persistentes
 
         let vehiculo = await api.get(`/vehiculos/${idIn}`)
-            .then(data => data.data[0])
-            .catch(error => console.error(error));
-        
+            .then(data => {
+                console.log(data);
+                return data.data[0];
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
         let listTipVe = await api.get(`/tipovehiculos`)
-            .then(data => data.data)
-            .catch(error => console.error(error));
+            .then(data => {
+                console.log(data);
+                return data.data;
+            })
+            .catch(error => {
+                console.error(error);
+            });
 
         form.idIn.value = idIn;
         form.patente.value = patenteIn;
         form.track_id.value = trackIdIn;
-
         listTipVe.forEach(element => {
+            console.log(element);
             if (!element.vehicle) {
                 const optTipo = document.createElement('option');
                 optTipo.value = element.id;
@@ -207,19 +238,28 @@
         });
 
         let listVeE = await api.get("/empresas")
-            .then(data => data.data)
-            .catch(error => console.error(error));
+            .then(data => {
+                console.log();
+                return data.data;
+            })
+            .catch(error => {
+                console.error(error);
+            });
 
         listVeE.forEach(element => {
-            const optEmp = document.createElement('option');
-            optEmp.value = element.id;
-            optEmp.textContent = element.nombre;
-            form.empresa.appendChild(optEmp);
+            console.log(element);
+            if (element) {
+                const optEmp = document.createElement('option');
+                optEmp.value = element.id;
+                optEmp.textContent = element.nombre;
+                form.empresa.appendChild(optEmp);
+            }
         });
 
         openModal('editVe');
     }
 
+    var tableEditVe;
     const formEditVe = document.getElementById('formEditVe');
     formEditVe.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -231,102 +271,57 @@
                 company_id: formEditVe.empresa.value,
                 vehicle_state_id: 1,
             })
-            .then(data => {
-                closeModal("editVe");
-                tableVe.ajax.reload(null, false);  // Recargar la tabla sin cambiar la página
-            })
-            .catch(error => {
-                console.error(error);
-            });
+                .then(data => {
+                    closeModal("editVe");
+                    tableVe.ajax.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                });
         }
     });
-
-    function validarFormularioCrearVehiculo() {
-        var patente = formCV.patente.value;
-        var tipo = formCV.tipo.value;
-        var patenteRegex = /^[a-zA-Z]{4}\d{2}$/;
-
-        if (!patenteRegex.test(patente)) {
-            alert("Formato de patente inválido. Debe ser XXXXNN");
-            return false;
-        }
-
-        if (patente === "" || tipo === "") {
-            alert("Todos los campos son obligatorios");
-            return false;
-        }
-
-        return true;
-    }
-
-    function validarCrearTipo() {
-        var tipo = formTipo.tipo.value;
-
-        if (tipo === "") {
-            alert("campo obligatorio");
-            return false;
-        }
-
-        return true;
-    }
 
     function validarEditar() {
         var patente = formEditVe.patente.value;
         var tipo = formEditVe.tipo.value;
         var track_id = formEditVe.track_id.value;
-        var patenteRegex = /^[a-zA-Z]{4}\d{2}$/;
 
+        // Validación de patente
+        var patenteRegex = /^[a-zA-Z]{4}\d{2}$/;
         if (!patenteRegex.test(patente)) {
             alert("Formato de patente inválido. Debe ser XXXXNN");
             return false;
         }
 
+        // Validación de campos obligatorios
         if (patente === "" || tipo === "" || track_id === "") {
             alert("Todos los campos son obligatorios");
             return false;
         }
 
+        // Si la validación pasa, se puede enviar el formulario
         return true;
     }
 
-    async function sincronizar() {
-        try {
-            return await api.get('/sync');
-        } catch (error) {
-            console.error('Error buscando vehiculos', error);
-            throw error;
-        }
-    }
-
-    function eliminarVehiculo(id, patente) {
-        if (confirm(`¿Está seguro que desea eliminar el vehículo con patente ${patente}?`)) {
-            var token = localStorage.getItem("token");
-            $.ajax({
-                url: `https://dev.wit.la/api/vehiculos/${id}`,
-                type: 'DELETE',
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                },
-                success: function (result) {
-                    alert('Vehículo eliminado exitosamente.');
-                    tableVe.ajax.reload(null, false);  // Recargar la tabla sin cambiar la página
-                },
-                error: function (xhr, status, error) {
-                    alert('Ocurrió un error al eliminar el vehículo: ' + error);
-                }
-            });
-        }
-    }
+    //poblar tablas desde api
     $(document).ready(function () {
-        //variable de la api
-        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
+        const api = getApi();
+        const baseUrl = api.baseUrl;
+
+        // Mostrar la pantalla de carga antes de cargar los datos
+        $("#loadingscreen").show();
+
         tableVe = $("#tableVehiculo").DataTable({
             "ajax": {
-                "url": baseUrl+"vehiculos",
+                "url": baseUrl + "vehiculos",
                 "dataSrc": "",
                 "beforeSend": function (xhr) {
                     var token = localStorage.getItem("token");
                     xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                },
+                "complete": function () {
+                    // Ocultar la pantalla de carga una vez que los datos se han cargado
+                    $("#loadingscreen").hide();
                 }
             },
             "columns": [
@@ -351,11 +346,10 @@
                 {
                     "data": "id",
                     "render": function (data, type, row) {
-                        var botones = [
-                            `<button class='fa fa-pencil btnAccion' onclick='modalEditVe(${row.id},"${row.patente}")'></button>`,
-                            `<button class='fa fa-trash btnAccion' onclick='eliminarVehiculo(${row.id},"${row.patente}")'></button>`
-                        ];
-                        return botones.join('');
+                        return `
+                        <button class='fa fa-pencil btnAccion' onclick='modalEditVe(${row.id},"${row.patente}")'></button>
+                        <button class='fa fa-trash btnAccion' onclick='eliminarVehiculo(${row.id},"${row.patente}")'></button>
+                    `;
                     }
                 }
             ],
@@ -364,4 +358,95 @@
             }
         });
     });
+
+
+
+    function validarFormularioCrearVehiculo() {
+        var patente = formCV.patente.value;
+        var track_id = formCV.track_id.value;
+        var tipo = formCV.tipo.value;
+
+        // Validación de patente
+        var patenteRegex = /^[a-zA-Z]{4}\d{2}$/;
+        if (!patenteRegex.test(patente)) {
+            alert("Formato de patente inválido. Debe ser XXXXNN");
+            return false;
+        }
+
+        // Validación de campos obligatorios
+        if (patente === "" || track_id === "" || tipo === "") {
+            alert("Todos los campos son obligatorios");
+            return false;
+        }
+
+        // Si la validación pasa, se puede enviar el formulario
+        return true;
+    }
+
+    function validarCrearTipo() {
+        var tipo = formTipo.tipo.value;
+
+        //agregar validacion para formato de cuando este disponible 
+        if (tipo === "") {
+            alert("campo obligatorio");
+            return false;
+        }
+
+        // Si la validación pasa, se puede enviar el formulario
+        return true;
+    }
+
+    //funcion para sincronizar vehiculos 
+    async function sincronizar() {
+        $("#loadingscreen").show();
+
+        try {
+            await api.get('/sync');
+            alert('Sincronización completa');
+        } catch (error) {
+            console.error('Error durante la sincronización', error);
+            alert('Error durante la sincronización');
+        } finally {
+
+            $("#loadingscreen").hide();
+
+            if (tableVe) {
+                tableVe.ajax.reload();
+            }
+        }
+    }
+
+
+
+    function eliminarVehiculo(id, patente) {
+        const api = getApi();
+        const baseUrl = api.baseUrl;
+
+        if (confirm(`¿Está seguro que desea eliminar el vehículo con patente ${patente}?`)) {
+            var token = localStorage.getItem("token");
+
+            // Mostrar la pantalla de carga antes de eliminar el vehículo
+            $("#loadingscreen").show();
+
+            $.ajax({
+                url: baseUrl + `vehiculos/${id}`,
+                type: 'DELETE',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                },
+                success: function (result) {
+                    alert('Vehículo eliminado exitosamente.');
+                    tableVe.ajax.reload();  // Recargar la tabla de datos
+                },
+                error: function (xhr, status, error) {
+                    alert('Ocurrió un error al eliminar el vehículo: ' + error);
+                },
+                complete: function () {
+                    // Ocultar la pantalla de carga después de completar la solicitud
+                    $("#loadingscreen").hide();
+                }
+            });
+        }
+    }
+
 </script>

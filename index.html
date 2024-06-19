@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,66 +12,67 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <!--Mapa-->
-     
+
 </head>
+
 <body>
     <div id="pageLogin">
         <div style="text-align: center;">
-        
+
         </div>
         <div class="panelCentral">
-        <div >
-            <form class="login-container" id="formLogin" >
-                <h1 style="margin-left: 10%;">Ingreso a Plataforma</h1>
-        
-                <div class="form-login">
-                    <i class="fa fa-user-circle-o"></i>
-                    <input type="email" class="login" name="usuario" placeholder="Usuario" id="usuario">
-                </div>
-                <div class="form-login">
-                    <i class="fa fa-key"></i>
-                    <input type="password" class="login" name="password" placeholder="Contraseña" id="password">
-                </div>
-                <div class="rpass">
-                    <a href="#" onclick="modalRecuperarPass()">Recuperar contraseña</a> 
-                </div>
-                <div class="form-info">
-                <button  class="btnCrear" >Ingresar</button>
-                </div>
-            </form>
+            <div>
+                <form class="login-container" id="formLogin">
+                    <h1 style="margin-left: 10%;">Ingreso a Plataforma</h1>
+
+                    <div class="form-login">
+                        <i class="fa fa-user-circle-o"></i>
+                        <input type="email" class="login" name="usuario" placeholder="Usuario" id="usuario">
+                    </div>
+                    <div class="form-login">
+                        <i class="fa fa-key"></i>
+                        <input type="password" class="login" name="password" placeholder="Contraseña" id="password">
+                    </div>
+                    <div class="rpass">
+                        <a href="#" onclick="modalRecuperarPass()">Recuperar contraseña</a>
+                    </div>
+                    <div class="form-info">
+                        <button class="btnCrear">Ingresar</button>
+                    </div>
+                </form>
+            </div>
+
         </div>
-      
-    </div>
         <!-- Modal: Formulario para recuperar contraseña -->
         <div class="mdl-overlay" id="recPass-overlay" onclick="closeModal('recPass')"></div>
         <div class="mdl-content" id="recPass-modal">
-        <h1 class="tituloModal">Recuperar contraseña <i class="fa fa-key fa-fw"></i></h1>
-        <form  method="post" id="formRecPass">
-            <div class="form-cont">
-            <div class="form-group">
-                <i>Ingrese su correo electronico:</i>
-                <input type="email" name="mail" id="mail" class="entrada" placeholder="Email" required/>
-            </div>
-                <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
-            </div>
-            </div>
+            <h1 class="tituloModal">Recuperar contraseña <i class="fa fa-key fa-fw"></i></h1>
+            <form method="post" id="formRecPass">
+                <div class="form-cont">
+                    <div class="form-group">
+                        <i>Ingrese su correo electronico:</i>
+                        <input type="email" name="mail" id="mail" class="entrada" placeholder="Email" required />
+                    </div>
+                    <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                </div>
+        </div>
         </form>
     </div>
     <script>
-        
-        async function modalRecuperarPass(){
+
+        async function modalRecuperarPass() {
             const form = document.getElementById('formRecPass');
             openModal('recPass');
         }
         //enviar el formulario para recuperar contraseña 
         // Agrega un event listener para el evento de submit del formulario
-        const recPassForm=document.getElementById('formRecPass')
+        const recPassForm = document.getElementById('formRecPass')
         recPassForm.addEventListener('submit', (e) => {
             e.preventDefault(); // Evita que el formulario se envíe automáticamente
             // Obtiene los datos del formulario y los coloca en un objeto
             datos = {
                 email: recPassForm.mail.value,
-                url:window.location.origin,
+                url: window.location.origin,
             }
             // Realiza una solicitud fetch para enviar los datos del formulario a un archivo PHP en el servidor
             fetch('https://dev.wit.la/api/password/email', {
@@ -81,76 +83,78 @@
                 },
                 body: JSON.stringify(datos) // Convierte los datos a formato JSON y los envía en el cuerpo de la solicitud
             })
-            .then(reply => {
-                return reply.text(); // Convierte la respuesta a texto
-            })
-            .then(msg => {
-                alert('Enviado correctamente'); // Muestra una alerta indicando que el formulario se envió correctamente
-                // Limpia los campos del formulario después de enviarlo
-                recPassForm.mail.value = '';
-    
-            })
-            .then(data=>{
-                closeModal("recPass");
-                    })
-            .catch(error => {
-                console.log(error); // Si hay un error, lo muestra en la consola del navegador
-            });
-        }); 
-    
+                .then(reply => {
+                    return reply.text(); // Convierte la respuesta a texto
+                })
+                .then(msg => {
+                    alert('Enviado correctamente'); // Muestra una alerta indicando que el formulario se envió correctamente
+                    // Limpia los campos del formulario después de enviarlo
+                    recPassForm.mail.value = '';
+
+                })
+                .then(data => {
+                    closeModal("recPass");
+                })
+                .catch(error => {
+                    console.log(error); // Si hay un error, lo muestra en la consola del navegador
+                });
+        });
+
         //login
-            const FormLogin= document.getElementById('formLogin');
-            FormLogin.addEventListener("submit",(e)=>{
-                e.preventDefault();
-                datos={
-                    email:FormLogin.usuario.value,
-                    password:FormLogin.password.value,
-                }
-                fetch(`https://dev.wit.la/api/login`,{
-                method:"post",
-                headers:{
-                    "content-type":"application/json",
-            },body:JSON.stringify(datos),
+        const FormLogin = document.getElementById('formLogin');
+        FormLogin.addEventListener("submit", (e) => {
+            e.preventDefault();
+            datos = {
+                email: FormLogin.usuario.value,
+                password: FormLogin.password.value,
+            }
+            const api = getApi();
+            const baseUrl = api.baseUrl;
+            //fetch(`https://dev.wit.la/api/login`, {
+            fetch(baseUrl + `login`, {
+                method: "post",
+                headers: {
+                    "content-type": "application/json",
+                }, body: JSON.stringify(datos),
+            })
+                .then(reply => {
+                    if (!reply.ok) {
+                        if (reply.status === 401) {
+                            window.alert("Este usuario no existe");
+                        } else {
+                            window.alert("Ha ocurrido un error en la solicitud");
+                        }
+                        throw new Error('Network response was not ok');
+                    }
+                    return reply.json();
+                })
+
+                .then(data => {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("level", data.level);
+                    localStorage.setItem("name", data.name);
+                    localStorage.setItem("id", data.id)
+                    location.href = "app.html";
+
+                })
+                .catch(error => {
+
+                })
         })
-            .then(reply=>{
-                if (!reply.ok) {
-                if (reply.status === 401) {
-                    window.alert("Este usuario no existe");
-                } else {
-                    window.alert("Ha ocurrido un error en la solicitud");
-                }
-                throw new Error('Network response was not ok');
-                }
-                return reply.json();
-            })
-            
-            .then(data=>{
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("level", data.level);
-                localStorage.setItem("name", data.name);
-                localStorage.setItem("id", data.id)
-                location.href="app.html";
-                
-            })
-            .catch(error => {
-              
-            })
-            })
-            
-            function openModal(modal){
-  // Muestra el overlay y el modal correspondiente cambiando su estilo de visualización a "block"
-  document.getElementById(modal+'-overlay').style.display = 'block';
-  document.getElementById(modal+'-modal').style.display = 'block';
-}
-function closeModal(modal){
-  // Oculta el overlay y el modal correspondiente cambiando su estilo de visualización a "none"
-  document.getElementById(modal+'-overlay').style.display = 'none';
-  document.getElementById(modal+'-modal').style.display = 'none';
-}
+
+        function openModal(modal) {
+            // Muestra el overlay y el modal correspondiente cambiando su estilo de visualización a "block"
+            document.getElementById(modal + '-overlay').style.display = 'block';
+            document.getElementById(modal + '-modal').style.display = 'block';
+        }
+        function closeModal(modal) {
+            // Oculta el overlay y el modal correspondiente cambiando su estilo de visualización a "none"
+            document.getElementById(modal + '-overlay').style.display = 'none';
+            document.getElementById(modal + '-modal').style.display = 'none';
+        }
 
     </script>
-    <script>
-        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
-    </script>
+
 </body>
+
 </html>

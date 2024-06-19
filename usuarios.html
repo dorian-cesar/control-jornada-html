@@ -164,10 +164,12 @@
 
         //poblar tabla
         $(document).ready(function () {
-            const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
+            const api = getApi();
+            const baseUrl = api.baseUrl;
+
             tableUs = $("#tableUsuarios").DataTable({
                 "ajax": {
-                    "url": baseUrl+"users",
+                    "url": baseUrl + "users",
                     "dataSrc": "",
                     "beforeSend": function (xhr) {
                         var token = localStorage.getItem("token");
@@ -199,7 +201,7 @@
             if (confirm(`¿Está seguro que desea eliminar el usuario ${name}?`)) {
                 var token = localStorage.getItem("token");
                 $.ajax({
-                    url: baseUrl+`users/${id}`,
+                    url: baseUrl + `users/${id}`,
                     type: 'DELETE',
                     beforeSend: function (xhr) {
                         xhr.setRequestHeader('Authorization', 'Bearer ' + token);

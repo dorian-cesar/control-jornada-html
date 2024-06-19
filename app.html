@@ -184,7 +184,7 @@
 <script>
   // Se importa la librería axios para manejar peticiones HTTP
   const api= axios.create({
-    baseURL: "https://dev.wit.la/api",// Se define la URL base de la API
+    baseURL: "https://control-jornada.wit.la/backend-control-jornada/public/api",// Se define la URL base de la API
     headers: {
       'content-type':'application/json',// Se establece el tipo de contenido como JSON
     }
@@ -373,8 +373,9 @@ function closeNotificationModal() {
   modal.style.display = 'none';
 }
 
-
- 
+</script>
+<script>
+  const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
 </script>
 
 </html>

@@ -1,78 +1,82 @@
 <div id="pageTiempoReal">
     <div style="text-align: center;">
-    <h1>Estado en tiempo Real</h1>
+        <h1>Estado en tiempo Real</h1>
     </div>
-    <div class="redir margin-left: 30px " >
+    <div class="redir margin-left: 30px ">
         <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
     </div>
-       <div class="panelCentralTable">
+    <div class="panelCentralTable">
         <div>
-             <button  class="btnCrear" onclick="sincronizar()"><i class="fa fa-refresh">Sincronizar </i></button>
+            <button class="btnCrear" onclick="sincronizar()"><i class="fa fa-refresh">Sincronizar </i></button>
 
         </div>
-    <div>
-        <button onclick="exportarCSVTReal()" class="btnsub" ><i class="fa fa-file-text-o"></i> csv</button>
-        <button onclick="excelTReal()" class="btnsub" ><i class="fa fa-file-excel-o"></i> Excel</button>
-        <button onclick="imprimirTablaTReal()" class="btnsub" ><i class="fa fa-print"></i> Imprimir</button>
-        <button onclick="copiarTReal()" class="btnsub" ><i class="fa fa-files-o"></i> Copiar</button>
-    </div>
-    <div class="tableEstadoTiempoR">
-    <table id="tableEstadoTiempoR" class="display" style="width: 1280px;">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Patente</th>
-                <th>conductor</th>
-                <th>velocidad</th>
-                <th>latitud</th>
-                <th>longitud</th>
-                <th>Ignicion</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    </div>
+        <div>
+            <button onclick="exportarCSVTReal()" class="btnsub"><i class="fa fa-file-text-o"></i> csv</button>
+            <button onclick="excelTReal()" class="btnsub"><i class="fa fa-file-excel-o"></i> Excel</button>
+            <button onclick="imprimirTablaTReal()" class="btnsub"><i class="fa fa-print"></i> Imprimir</button>
+            <button onclick="copiarTReal()" class="btnsub"><i class="fa fa-files-o"></i> Copiar</button>
+        </div>
+        <div class="tableEstadoTiempoR">
+            <table id="tableEstadoTiempoR" class="display" style="width: 1280px;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patente</th>
+                        <th>conductor</th>
+                        <th>velocidad</th>
+                        <th>latitud</th>
+                        <th>longitud</th>
+                        <th>Ignicion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-<script>
-       $(document).ready(function(){
-        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
-        var dt = $("#tableEstadoTiempoR").DataTable({
-            "ajax":{
-                "url": baseUrl+"logs", 
-                "dataSrc":"", 
-                "beforeSend":function(xhr){
-                    var token=localStorage.getItem("token");
-                    xhr.setRequestHeader('Authorization','Bearer '+ token);
-                }
+    <script>
+        $(document).ready(function () {
+            //llamada a la api 
+            const api = getApi();
+            const baseUrl = api.baseUrl;
+            var dt = $("#tableEstadoTiempoR").DataTable({
+                "ajax": {
+                    "url": baseUrl + "logs",
+                    "dataSrc": "",
+                    "beforeSend": function (xhr) {
+                        var token = localStorage.getItem("token");
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    }
 
-            },
-            "columns":[
-                {"data":"vehicle_id"},
-                {"data":"vehicle.patente"},
-                {"data":"vehicle.driver.nombre"},
-                {"data":"velocidad"},
-                {"data":"lat"},
-                {"data":"lng"},
-                {"data":"id","render":function(data, type, row){
-                    var boton=[];
-                        if(row.ignicion>=1){
-                            boton.push(`<i class='fa fa-toggle-on' style="color:#84F53D" ></i> `)
-                        }else{
-                            boton.push(`<i class="fa fa-toggle-off" ></i> `)
+                },
+                "columns": [
+                    { "data": "vehicle_id" },
+                    { "data": "vehicle.patente" },
+                    { "data": "vehicle.driver.nombre" },
+                    { "data": "velocidad" },
+                    { "data": "lat" },
+                    { "data": "lng" },
+                    {
+                        "data": "id", "render": function (data, type, row) {
+                            var boton = [];
+                            if (row.ignicion >= 1) {
+                                boton.push(`<i class='fa fa-toggle-on' style="color:#84F53D" ></i> `)
+                            } else {
+                                boton.push(`<i class="fa fa-toggle-off" ></i> `)
+                            }
+                            return boton;
                         }
-                        return boton;
-                }},
-                
-            ],
-            "language":{
-                //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
-            }
-        })
-    })
+                    },
 
-    function exportarCSVTReal() {
+                ],
+                "language": {
+                    //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+                }
+            })
+        })
+
+        function exportarCSVTReal() {
             var tabla = document.getElementById("tableEstadoTiempoR");
             var csv = [];
 
@@ -108,7 +112,7 @@
             document.body.removeChild(enlaceTemporal);
         }
 
-    function excelTReal() {
+        function excelTReal() {
             // Seleccionar la tabla
             var tabla = document.getElementById("tableEstadoTiempoR");
 
@@ -137,34 +141,34 @@
             enlaceTemporal.click();
             document.body.removeChild(enlaceTemporal);
         }
-      
+
         async function imprimirTablaTReal() {
             // Selecciona el contenedor de la tabla
-            let data= await api.get("/logs");
+            let data = await api.get("/logs");
 
             // Crea un nuevo elemento de ventana de impresión y coloca la tabla dentro de él
             var ventanaImpresion = window.open('', '_blank');
-            var tablaTR= document.createElement("table");
-            tablaTR.style.width= "100%";
-            tablaTR.style.textAlign="center";
-            tablaTR.style.border="1px solid black"
-            tablaTR.style.borderCollapse= "collapse";
-            var trOut= document.createElement("tr");
-            var thId=document.createElement("th");
-            var thPatente=document.createElement("th");
-            var thConductor=document.createElement("th");
-            var thVelocidad=document.createElement("th");
-            var thLatitud=document.createElement("th");
-            var thLongitud=document.createElement("th");
-            var thIgnicion=document.createElement("th");
+            var tablaTR = document.createElement("table");
+            tablaTR.style.width = "100%";
+            tablaTR.style.textAlign = "center";
+            tablaTR.style.border = "1px solid black"
+            tablaTR.style.borderCollapse = "collapse";
+            var trOut = document.createElement("tr");
+            var thId = document.createElement("th");
+            var thPatente = document.createElement("th");
+            var thConductor = document.createElement("th");
+            var thVelocidad = document.createElement("th");
+            var thLatitud = document.createElement("th");
+            var thLongitud = document.createElement("th");
+            var thIgnicion = document.createElement("th");
 
-            thId.textContent="ID";
-            thPatente.textContent="Patente";
-            thConductor.textContent="Conductor";
-            thVelocidad.textContent="Velocidad";
-            thLatitud.textContent="Latitud";
-            thLongitud.textContent="Longitud";
-            thIgnicion.textContent="Ignicion";
+            thId.textContent = "ID";
+            thPatente.textContent = "Patente";
+            thConductor.textContent = "Conductor";
+            thVelocidad.textContent = "Velocidad";
+            thLatitud.textContent = "Latitud";
+            thLongitud.textContent = "Longitud";
+            thIgnicion.textContent = "Ignicion";
 
             trOut.appendChild(thId);
             trOut.appendChild(thPatente);
@@ -177,22 +181,22 @@
             tablaTR.appendChild(trOut);
 
             data.data.forEach(element => {
-                var trIn=document.createElement("tr");
-                var tdId=document.createElement("td");
-                var tdPatente=document.createElement("td");
-                var tdConductor=document.createElement("td");
-                var tdVelocidad=document.createElement("td");
-                var tdLatitud=document.createElement("td");
-                var tdLongitud=document.createElement("td");
-                var tdIgnicion=document.createElement("td");
+                var trIn = document.createElement("tr");
+                var tdId = document.createElement("td");
+                var tdPatente = document.createElement("td");
+                var tdConductor = document.createElement("td");
+                var tdVelocidad = document.createElement("td");
+                var tdLatitud = document.createElement("td");
+                var tdLongitud = document.createElement("td");
+                var tdIgnicion = document.createElement("td");
 
-                tdId.textContent=element.vehicle_id;
-                tdPatente.textContent=element.vehicle?element.vehicle.patente:"";
-                tdConductor.textContent=element.vehicle&&element.vehicle.driver?element.vehicle.driver.nombre:"";
-                tdVelocidad.textContent=element.velocidad;
-                tdLatitud.textContent=element.lat;
-                tdLongitud.textContent=element.lng;
-                tdIgnicion.textContent=element.ignicion;
+                tdId.textContent = element.vehicle_id;
+                tdPatente.textContent = element.vehicle ? element.vehicle.patente : "";
+                tdConductor.textContent = element.vehicle && element.vehicle.driver ? element.vehicle.driver.nombre : "";
+                tdVelocidad.textContent = element.velocidad;
+                tdLatitud.textContent = element.lat;
+                tdLongitud.textContent = element.lng;
+                tdIgnicion.textContent = element.ignicion;
 
                 trIn.appendChild(tdId);
                 trIn.appendChild(tdPatente);
@@ -205,32 +209,32 @@
                 tablaTR.appendChild(trIn);
             });
 
-             // Imprime la ventana de impresión
+            // Imprime la ventana de impresión
             ventanaImpresion.document.body.appendChild(tablaTR);
             ventanaImpresion.print();
             ventanaImpresion.close();
-            
+
         }
         function copiarTReal() {
-        var tabla = document.getElementById("tableTarjetas");
-        var seleccion = window.getSelection();
-        var rango = document.createRange();
-        rango.selectNodeContents(tabla);
-        seleccion.removeAllRanges();
-        seleccion.addRange(rango);
-        document.execCommand("copy");
-        seleccion.removeAllRanges();
-    }
-    //funcion para sincronizar vehiculos 
-    async function sincronizar(){
-        try{
-            return await api.get('/sync');
-        }catch (error){
-            console.error('Error buscando vehiculos',error);
-            throw error;
+            var tabla = document.getElementById("tableTarjetas");
+            var seleccion = window.getSelection();
+            var rango = document.createRange();
+            rango.selectNodeContents(tabla);
+            seleccion.removeAllRanges();
+            seleccion.addRange(rango);
+            document.execCommand("copy");
+            seleccion.removeAllRanges();
         }
-    }
-     
-</script>
+        //funcion para sincronizar vehiculos 
+        async function sincronizar() {
+            try {
+                return await api.get('/sync');
+            } catch (error) {
+                console.error('Error buscando vehiculos', error);
+                throw error;
+            }
+        }
+
+    </script>
 
 </div>

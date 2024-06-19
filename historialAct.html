@@ -1,62 +1,63 @@
-<div id="pageHistorialActividades" >
+<div id="pageHistorialActividades">
     <div style="text-align: center;">
-    <h1>Historial de Actividades</h1>
+        <h1>Historial de Actividades</h1>
     </div>
-    <div class="redir margin-left: 30px " >
+    <div class="redir margin-left: 30px ">
         <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
     </div>
     <div class="panelCentralTable">
         <div>
-            <button onclick="exportarCSVHAct()" class="btnsub" >csv</button>
-            <button onclick="excelHAct()" class="btnsub" >Excel</button>
-            <button onclick="imprimirTablaHAct()" class="btnsub" >Imprimir</button>
-            <button onclick="copiarHAct()"  class="btnsub" >Copiar</button>
+            <button onclick="exportarCSVHAct()" class="btnsub">csv</button>
+            <button onclick="excelHAct()" class="btnsub">Excel</button>
+            <button onclick="imprimirTablaHAct()" class="btnsub">Imprimir</button>
+            <button onclick="copiarHAct()" class="btnsub">Copiar</button>
         </div>
-    <table id="tableHistorialAct" style="width: 1280px;">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Conductor</th>
-                <th>Patente</th>
-                <th>Empresa</th>
-                <th>Tipo evento</th>
-                <th>Fecha y Hora</th>
-            </tr>
-        </thead>
-        <tbody>         
-        </tbody>
-    </table>
+        <table id="tableHistorialAct" style="width: 1280px;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Conductor</th>
+                    <th>Patente</th>
+                    <th>Empresa</th>
+                    <th>Tipo evento</th>
+                    <th>Fecha y Hora</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
-<script>
-    //poblar tabla
-    $(document).ready(function(){
-        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
-    tableHistAct =$("#tableHistorialAct").DataTable({
-        "ajax":{
-            "url":baseUrl+"historial",
-            "dataSrc":"",
-            "beforeSend":function(xhr){
-                    var token=localStorage.getItem("token");
-                    xhr.setRequestHeader('Authorization','Bearer '+ token);
+    <script>
+        //poblar tabla
+        $(document).ready(function () {
+            const api = getApi();
+            const baseUrl = api.baseUrl;
+            tableHistAct = $("#tableHistorialAct").DataTable({
+                "ajax": {
+                    "url": baseUrl + "historial",
+                    "dataSrc": "",
+                    "beforeSend": function (xhr) {
+                        var token = localStorage.getItem("token");
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    }
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "driver.nombre" },
+                    { "data": "driver.vehicle.patente" },
+                    { "data": "driver.company.nombre" },
+                    { "data": "event" },
+                    { "data": "formatted_updated_at" },
+                ],
+                "language": {
+                    //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
                 }
-        },
-        "columns":[
-            {"data":"id"},   
-            {"data":"driver.nombre"},   
-            {"data":"driver.vehicle.patente"},   
-            {"data":"driver.company.nombre"},   
-            {"data":"event"},   
-            {"data":"formatted_updated_at"},   
-        ],
-        "language":{
-                //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
-        }
-    })
-    })
+            })
+        })
 
 
 
-    function exportarCSVHAct() {
+        function exportarCSVHAct() {
             var tabla = document.getElementById("tableHistorialAct");
             var csv = [];
 
@@ -92,7 +93,7 @@
             document.body.removeChild(enlaceTemporal);
         }
 
-    function excelHAct() {
+        function excelHAct() {
             // Seleccionar la tabla
             var tabla = document.getElementById("tableHistorialAct");
 
@@ -121,35 +122,35 @@
             enlaceTemporal.click();
             document.body.removeChild(enlaceTemporal);
         }
-      
+
         async function imprimirTablaHAct() {
             // Selecciona el contenedor de la tabla
-            let data= await api.get("/historial");
+            let data = await api.get("/historial");
             // Crea un nuevo elemento de ventana de impresión y coloca la tabla dentro de él
             var ventanaImpresion = window.open('', '_blank');
-            var TablaHist=document.createElement("table");
-            TablaHist.style.width= "100%";
-            TablaHist.style.textAlign="center";
-            TablaHist.style.border="1px solid black"
-            TablaHist.style.borderCollapse= "collapse";
-            var trOutH=document.createElement("tr");
-            var thIdH=document.createElement("th");
-            var thCor=document.createElement("th");
-            var thVel=document.createElement("th");
-            var thNomCond=document.createElement("th");
-            var thPat=document.createElement("th");
-            var thNomEmp=document.createElement("th");
-            var thEvento=document.createElement("th");
-            var thFechaC=document.createElement("th");
+            var TablaHist = document.createElement("table");
+            TablaHist.style.width = "100%";
+            TablaHist.style.textAlign = "center";
+            TablaHist.style.border = "1px solid black"
+            TablaHist.style.borderCollapse = "collapse";
+            var trOutH = document.createElement("tr");
+            var thIdH = document.createElement("th");
+            var thCor = document.createElement("th");
+            var thVel = document.createElement("th");
+            var thNomCond = document.createElement("th");
+            var thPat = document.createElement("th");
+            var thNomEmp = document.createElement("th");
+            var thEvento = document.createElement("th");
+            var thFechaC = document.createElement("th");
 
-            thIdH.textContent="ID";
-            thCor.textContent="coordenadas";
-            thVel.textContent="Velocidad";
-            thNomCond.textContent="Conductor";
-            thPat.textContent="Patente";
-            thNomEmp.textContent="Empresa";
-            thEvento.textContent="Tipo evento";
-            thFechaC.textContent="Fecha y Hora";
+            thIdH.textContent = "ID";
+            thCor.textContent = "coordenadas";
+            thVel.textContent = "Velocidad";
+            thNomCond.textContent = "Conductor";
+            thPat.textContent = "Patente";
+            thNomEmp.textContent = "Empresa";
+            thEvento.textContent = "Tipo evento";
+            thFechaC.textContent = "Fecha y Hora";
 
             trOutH.appendChild(thIdH);
             trOutH.appendChild(thCor);
@@ -163,24 +164,24 @@
             TablaHist.appendChild(trOutH);
 
             data.data.forEach(element => {
-                var trInH=document.createElement("tr");
-                var tdIdH=document.createElement("td");
-                var tdCor=document.createElement("td");
-                var tdVel=document.createElement("td");
-                var tdNomCond=document.createElement("td");
-                var tdPat=document.createElement("td");
-                var tdNomEmp=document.createElement("td");
-                var tdEvento=document.createElement("td");
-                var tdFechaC=document.createElement("td");
+                var trInH = document.createElement("tr");
+                var tdIdH = document.createElement("td");
+                var tdCor = document.createElement("td");
+                var tdVel = document.createElement("td");
+                var tdNomCond = document.createElement("td");
+                var tdPat = document.createElement("td");
+                var tdNomEmp = document.createElement("td");
+                var tdEvento = document.createElement("td");
+                var tdFechaC = document.createElement("td");
 
-                tdIdH.textContent=element.id;
-                tdCor.textContent=element.coordenadas;
-                tdVel.textContent=element.velocidad;
-                tdNomCond.textContent=element.driver?element.driver.nombre:"";
-                tdPat.textContent=element.driver&&element.driver.vehicle?element.driver.vehicle.patente:"";
-                tdNomEmp.textContent=element.driver&&element.driver.company?element.driver.company.nombre:"";
-                tdEvento.textContent=element.event?element.event.evento:"";
-                tdFechaC.textContent=element.created_at;
+                tdIdH.textContent = element.id;
+                tdCor.textContent = element.coordenadas;
+                tdVel.textContent = element.velocidad;
+                tdNomCond.textContent = element.driver ? element.driver.nombre : "";
+                tdPat.textContent = element.driver && element.driver.vehicle ? element.driver.vehicle.patente : "";
+                tdNomEmp.textContent = element.driver && element.driver.company ? element.driver.company.nombre : "";
+                tdEvento.textContent = element.event ? element.event.evento : "";
+                tdFechaC.textContent = element.created_at;
 
                 trInH.appendChild(tdIdH);
                 trInH.appendChild(tdCor);
@@ -194,24 +195,24 @@
 
                 TablaHist.appendChild(trInH);
             });
- 
+
 
             // Imprime la ventana de impresión
             ventanaImpresion.document.body.appendChild(TablaHist);
             ventanaImpresion.print();
             ventanaImpresion.close();
-            
+
         }
         function copiarHAct() {
-        var tabla = document.getElementById("tableHistorialAct");
-        var seleccion = window.getSelection();
-        var rango = document.createRange();
-        rango.selectNodeContents(tabla);
-        seleccion.removeAllRanges();
-        seleccion.addRange(rango);
-        document.execCommand("copy");
-        seleccion.removeAllRanges();
-    }
+            var tabla = document.getElementById("tableHistorialAct");
+            var seleccion = window.getSelection();
+            var rango = document.createRange();
+            rango.selectNodeContents(tabla);
+            seleccion.removeAllRanges();
+            seleccion.addRange(rango);
+            document.execCommand("copy");
+            seleccion.removeAllRanges();
+        }
 
-</script>
+    </script>
 </div>

@@ -1,7 +1,6 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
- 
-   
+
 
 <div id="pageEstado">
     <div style="text-align: center;">
@@ -41,10 +40,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.17/jspdf.plugin.autotable.min.js"></script>
 <script>
     $(document).ready(function () {
-        const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
+        const api = getApi();
+        const baseUrl = api.baseUrl;
         // Primero, obtenemos los datos de logs
         $.ajax({
-            url: baseUrl+"logs",
+            url: baseUrl + "logs",
             beforeSend: function (xhr) {
                 var token = localStorage.getItem("token");
                 xhr.setRequestHeader('Authorization', 'Bearer ' + token);
@@ -52,7 +52,7 @@
             success: function (logsData) {
                 // Después, obtenemos los datos de última conexión
                 $.ajax({
-                    url: baseUrl+"wsbuses",
+                    url: baseUrl + "wsbuses",
                     beforeSend: function (xhr) {
                         var token = localStorage.getItem("token");
                         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
@@ -146,7 +146,7 @@
         var table = $('#tableEstado').DataTable();
         var rows = table.rows().data().toArray();
         var columns = ["ID Tracker", "Patente", "Estado", "Velocidad", "Última Conexión"];
-        var data = rows.map(function(row) {
+        var data = rows.map(function (row) {
             return [row.vehicle_id, row.vehicle.patente, row.estado, row.velocidad, row.ultima_conexion];
         });
 
@@ -197,4 +197,3 @@
         selection.removeAllRanges();
     }
 </script>
-
