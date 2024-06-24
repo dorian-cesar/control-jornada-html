@@ -1,4 +1,3 @@
-<title>Perfil de Conductores</title>
 <style>
     .accionContainer {
         display: flex;
@@ -15,6 +14,7 @@
         margin-left: 30px;
     }
 </style>
+
 <div id="pagePerfilConductor">
     <div style="text-align: center;">
         <h1>Perfil de Conductores</h1>
@@ -24,6 +24,7 @@
     </div>
     <div class="panelCentralTable">
         <button class="btnCrear" onclick="modalConductor()">Crear</button>
+        <button class="btnCrear" onclick="actualizarTabla()">Actualizar</button>
         <table id="tableConductores" style="width: 1280px;">
             <thead>
                 <tr>
@@ -59,6 +60,7 @@
                 </div>
                 <div>
                     <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                    <button type="button" class="btnCrear" onclick="closeModal('crearConductor')">Cancelar</button>
                 </div>
             </div>
         </form>
@@ -77,6 +79,7 @@
                 </div>
                 <div>
                     <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                    <button type="button" class="btnCrear" onclick="closeModal('editarVehiculo')">Cancelar</button>
                 </div>
             </div>
         </form>
@@ -103,33 +106,28 @@
                 </div>
                 <div>
                     <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+                    <button type="button" class="btnCrear" onclick="closeModal('editarConductor')">Cancelar</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 <script src="variables.js"></script>
-<!--script-->
 <script>
-    // Function to open modal
     function openModal(modalId) {
         document.getElementById(modalId + '-modal').style.display = 'block';
     }
 
-    // Function to close modal
     function closeModal(modalId) {
         document.getElementById(modalId + '-modal').style.display = 'none';
     }
 
-    // Modal to add conductor
     async function modalConductor() {
         const form = document.getElementById('formConductor');
         const empresaSelect = document.getElementById('empresaSelect');
 
-        // Clear previous options
         empresaSelect.innerHTML = '';
 
-        // Get list of companies
         let empresas = await api.get('/empresas')
             .then(data => {
                 return data.data;
@@ -138,7 +136,6 @@
                 console.error(error);
             });
 
-        // Populate the select with company options
         empresas.forEach(empresa => {
             const option = document.createElement('option');
             option.value = empresa.id;
@@ -151,32 +148,61 @@
 
     var tableCC;
     const formCC = document.getElementById("formConductor");
-    formCC.addEventListener("submit", (e) => {
+
+    formCC.addEventListener("submit", async (e) => {
         e.preventDefault();
         if (validarCrearConductor()) {
+            // Obtener todos los datos actuales de la tabla
+            const conductores = await tableCC.rows().data().toArray();
+
+            // Verificar si el RUT ya existe en la tabla
+            const rutExistente = conductores.some(conductor => conductor.rut === formCC.rut.value);
+
+            if (rutExistente) {
+                alert("Este RUT ya existe en la tabla");
+                return;
+            }
+
+            // Si el RUT no existe, proceder a crear el conductor
             api.post("/conductores", {
                 rut: formCC.rut.value,
                 nombre: formCC.nombre.value,
                 company_id: formCC.empresa.value,
                 activo: true,
             })
-                .then(data => {
+                .then(() => {
                     closeModal("crearConductor");
-                    tableCC.ajax.reload();
+                    alert("Conductor creado correctamente"); // Mostrar alerta después de crear el conductor
+                    tableCC.ajax.reload(null, false); // Actualiza la tabla sin recargar la página completa
                 })
                 .catch(error => {
                     console.error(error);
                     if (error.response) {
                         switch (error.response.status) {
                             case 422:
-                                window.alert("Este Conductor ya existe");
+                                alert("Este Conductor ya existe en la base de datos");
+                                break;
+                            default:
+                                alert("El Rut ya esta registrado");
                         }
                     }
                 });
         }
     });
 
-    // Modal to edit vehicle
+    function validarCrearConductor() {
+        const rut = formCC.rut.value;
+        const nombre = formCC.nombre.value;
+        const empresa = formCC.empresa.value;
+
+        if (rut === "" || nombre === "" || empresa === "") {
+            alert("Todos los campos son obligatorios");
+            return false;
+        }
+
+        return true;
+    }
+
     async function modalEditVehiculo(idIn) {
         const form = document.getElementById('formVehiculo');
         let conductor = await api.get(`/conductores/${idIn}`)
@@ -203,12 +229,10 @@
         form.patente.appendChild(nullpat);
         listPat.forEach(element => {
             if (!element.driver || element.driver.id == conductor.id) {
-                if (element.company_id == conductor.company_id) {
-                    const optPat = document.createElement("option");
-                    optPat.value = element.id;
-                    optPat.textContent = element.patente;
-                    form.patente.appendChild(optPat);
-                }
+                const optPat = document.createElement("option");
+                optPat.value = element.id;
+                optPat.textContent = element.patente;
+                form.patente.appendChild(optPat);
             }
         });
 
@@ -226,29 +250,39 @@
             driver_id: formEditVehi.idIn.value,
             vehicle_id: formEditVehi.patente.value,
         })
-            .then(data => {
+            .then(() => {
                 closeModal("editarVehiculo");
-                tableCC.ajax.reload();
+                tableCC.ajax.reload(); // Refresh the table
             })
             .catch(error => {
                 console.error(error);
             });
     });
 
-    // Function to activate or deactivate conductor
     async function toggleConductor(id, activo) {
-        api.put(`/conductores/${id}`, {
-            activo: activo ? 1 : 0
-        })
-            .then(data => {
-                tableCC.ajax.reload();
-            })
-            .catch(error => {
-                console.error(error);
+        // Mostrar pantalla de carga
+        $("#loadingscreen").show();
+
+        try {
+            await api.put(`/conductores/${id}`, {
+                activo: activo ? 1 : 0
             });
+
+            // Ocultar pantalla de carga al completar la solicitud
+            $("#loadingscreen").hide();
+
+            // Actualizar la tabla después de la actualización
+            tableCC.ajax.reload();
+        } catch (error) {
+            console.error(error);
+            alert("Error al intentar cambiar el estado del conductor");
+
+            // Ocultar pantalla de carga en caso de error
+            $("#loadingscreen").hide();
+        }
     }
 
-    // Modal to edit conductor
+
     async function modalEditCond(idIn) {
         const form = document.getElementById('formCond');
         form.empresa.textContent = "";
@@ -286,35 +320,41 @@
         openModal('editarConductor');
     }
 
-    const formEditCond = document.getElementById('formCond');
+    const formEditCond = document.getElementById("formCond");
     formEditCond.addEventListener("submit", (e) => {
         e.preventDefault();
-        const idIn = formEditCond.idIn.value;
         if (validarEditarConductor()) {
-            api.put(`/conductores/${idIn}`, {
+            $("#loadingscreen").show(); // Mostrar pantalla de carga al inicio de la acción
+
+            api.put(`/conductores/${formEditCond.idIn.value}`, {
                 nombre: formEditCond.conductor.value,
                 rut: formEditCond.rut.value,
                 company_id: formEditCond.empresa.value,
             })
-                .then(data => {
+                .then(() => {
                     closeModal("editarConductor");
-                    tableCC.ajax.reload();
+                    tableCC.ajax.reload(); // Refresh the table
                 })
                 .catch(error => {
                     console.error(error);
                     if (error.response) {
                         switch (error.response.status) {
                             case 422:
-                                window.alert("Este Conductor ya existe");
+                                alert("Este Conductor ya existe");
+                                break;
+                            default:
+                                alert("Error al editar el conductor");
                         }
                     }
+                })
+                .finally(() => {
+                    $("#loadingscreen").hide(); // Ocultar pantalla de carga al finalizar la acción, ya sea exitosa o con error
                 });
         }
     });
 
-    // Load DataTables
+
     $(document).ready(function () {
-        //llamada a la funcion de la api 
         const api = getApi();
         const baseUrl = api.baseUrl;
 
@@ -375,30 +415,22 @@
 
     function eliminarConductor(id) {
         if (confirm('¿Estás seguro de que deseas eliminar este conductor?')) {
+            $("#loadingscreen").show(); // Mostrar la pantalla de carga
             api.delete(`/conductores/${id}`)
                 .then(data => {
-                    tableCC.ajax.reload();
+                    tableCC.ajax.reload(function () {
+                        $("#loadingscreen").hide(); // Ocultar la pantalla de carga después de recargar la tabla
+                    }, false);
                     alert("Registro eliminado correctamente");
                 })
                 .catch(error => {
                     console.error(error);
+                    $("#loadingscreen").hide(); // Ocultar la pantalla de carga en caso de error
                     alert("Error al intentar eliminar el registro");
                 });
         }
     }
 
-    function validarCrearConductor() {
-        const rut = formCC.rut.value;
-        const nombre = formCC.nombre.value;
-        const empresa = formCC.empresa.value;
-
-        if (rut === "" || nombre === "" || empresa === "") {
-            alert("Todos los campos son obligatorios");
-            return false;
-        }
-
-        return true;
-    }
 
     function validarEditarConductor() {
         const rut = formEditCond.rut.value;
@@ -410,6 +442,39 @@
             return false;
         }
 
+        // Mostrar pantalla de carga
+        $("#loadingscreen").show();
+
+        // Retorno true indicando que la validación fue exitosa
         return true;
+    }
+
+
+
+    function actualizarTabla() {
+        $("#loadingscreen").show();
+        tableCC.ajax.reload(function () {
+            $("#loadingscreen").hide();
+        }, false);
+    }
+
+
+    async function sincronizar() {
+        $("#loadingscreen").show();
+
+        try {
+            await api.get('/sync');
+            alert('Sincronización completa');
+        } catch (error) {
+            console.error('Error durante la sincronización', error);
+            alert('Error durante la sincronización');
+        } finally {
+
+            $("#loadingscreen").hide();
+
+            if (tableVe) {
+                tableVe.ajax.reload();
+            }
+        }
     }
 </script>

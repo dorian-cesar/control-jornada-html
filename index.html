@@ -75,7 +75,7 @@
                 url: window.location.origin,
             }
             // Realiza una solicitud fetch para enviar los datos del formulario a un archivo PHP en el servidor
-            fetch('https://dev.wit.la/api/password/email', {
+            fetch('https://control-jornada.wit.la/backend-control-jornada/public/api/email', {
                 method: 'POST',
                 mode: 'cors',
                 headers: {
@@ -100,7 +100,8 @@
                 });
         });
 
-        //login
+        
+      
         const FormLogin = document.getElementById('formLogin');
         FormLogin.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -108,10 +109,7 @@
                 email: FormLogin.usuario.value,
                 password: FormLogin.password.value,
             }
-            const api = getApi();
-            const baseUrl = api.baseUrl;
-            //fetch(`https://dev.wit.la/api/login`, {
-            fetch(baseUrl + `login`, {
+            fetch(`https://control-jornada.wit.la/backend-control-jornada/public/api/login`, {
                 method: "post",
                 headers: {
                     "content-type": "application/json",

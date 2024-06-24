@@ -1,10 +1,39 @@
+<style>
+    .contenedor-centrado {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .contenedor-centrado i {
+        margin: 0 10px;
+    }
+
+    .contenedor-centrado input,
+    .contenedor-centrado button {
+        margin: 0 5px;
+        padding: 5px;
+    }
+</style>
+
 <div id="pageHistorialActividades">
     <div style="text-align: center;">
-        <h1>Historial de Actividades</h1>
+        <h1>Inicio y Termino de Jornada</h1>
     </div>
     <div class="redir margin-left: 30px ">
         <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
     </div>
+
+    <div class="contenedor-centrado">
+        <i>Desde:</i>
+        <input type="date" class="sel-infoGen" name="inicio" id="fecha-desde">
+        <i>&nbsp;Hasta:</i>
+        <input type="date" class="sel-infoGen" name="termino" id="fecha-hasta">
+        <button class="btnCrear" onclick="filtrarPorFechas()">Buscar</button>
+    </div>
+
     <div class="panelCentralTable">
         <div>
             <button onclick="exportarCSVHAct()" class="btnsub">csv</button>
@@ -12,29 +41,34 @@
             <button onclick="imprimirTablaHAct()" class="btnsub">Imprimir</button>
             <button onclick="copiarHAct()" class="btnsub">Copiar</button>
         </div>
-        <table id="tableHistorialAct" style="width: 1280px;">
+        <table id="tableHistorialAct" style="width: 100%; margin-top: 20px;">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Conductor</th>
+                    <th>Nombre</th>
+                    <th>Rut</th>
                     <th>Patente</th>
-                    <th>Empresa</th>
-                    <th>Tipo evento</th>
-                    <th>Fecha y Hora</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Tipo</th>
+                    <th>Método</th>
                 </tr>
             </thead>
             <tbody>
             </tbody>
         </table>
     </div>
+
     <script>
-        //poblar tabla
+        let tableHistAct;
+
         $(document).ready(function () {
             const api = getApi();
             const baseUrl = api.baseUrl;
+
             tableHistAct = $("#tableHistorialAct").DataTable({
                 "ajax": {
-                    "url": baseUrl + "historial",
+                    "url": "https://control-jornada.wit.la/backend-control-jornada/public/api/registros",
                     "dataSrc": "",
                     "beforeSend": function (xhr) {
                         var token = localStorage.getItem("token");
@@ -43,67 +77,102 @@
                 },
                 "columns": [
                     { "data": "id" },
-                    { "data": "driver.nombre" },
-                    { "data": "driver.vehicle.patente" },
-                    { "data": "driver.company.nombre" },
-                    { "data": "event" },
-                    { "data": "formatted_updated_at" },
+                    { "data": "conductor"},
+                    { "data": "rut" },
+                    { "data": "patente" },
+                    {
+                        "data": "created_at",
+                        "render": function (data) {
+                            const fechaHora = new Date(data);
+                            const fecha = fechaHora.toLocaleDateString();
+                            return fecha;
+                        }
+                    },
+                    {
+                        "data": "created_at",
+                        "render": function (data) {
+                            const fechaHora = new Date(data);
+                            const hora = fechaHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            return hora;
+                        }
+                    },
+                    { "data": "tipo" },
+                    { "data": "metodo" },
                 ],
                 "language": {
                     //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
                 }
-            })
-        })
+            });
+        });
+
+
+        function filtrarPorFechas() {
+            const fechaDesdeInput = document.getElementById("fecha-desde").value;
+            const fechaHastaInput = document.getElementById("fecha-hasta").value;
+
+            // Convertir las fechas del formato DD/MM/YYYY a YYYY-MM-DD para la comparación
+            const fechaDesdeParts = fechaDesdeInput.split("-");
+            const fechaDesdeFormatted = `${fechaDesdeParts[0]}-${fechaDesdeParts[1]}-${fechaDesdeParts[2]}`;
+            const fechaHastaParts = fechaHastaInput.split("-");
+            const fechaHastaFormatted = `${fechaHastaParts[0]}-${fechaHastaParts[1]}-${fechaHastaParts[2]}`;
+
+            // Convertir las fechas a objetos Date
+            const dateDesde = fechaDesdeInput ? new Date(fechaDesdeFormatted) : null;
+            const dateHasta = fechaHastaInput ? new Date(fechaHastaFormatted) : null;
+
+            // Filtrar los datos de la tabla
+            tableHistAct.rows().every(function () {
+                const fechaRegistro = new Date(this.data().created_at.split('T')[0]); // Tomar solo la fecha de created_at
+
+                // Verificar si la fecha del registro está dentro del rango seleccionado
+                if ((dateDesde === null || fechaRegistro >= dateDesde) &&
+                    (dateHasta === null || fechaRegistro <= dateHasta)) {
+                    $(this.node()).show(); // Mostrar la fila si cumple con el filtro
+                } else {
+                    $(this.node()).hide(); // Ocultar la fila si no cumple con el filtro
+                }
+            });
+        }
+
+
+
 
 
 
         function exportarCSVHAct() {
             var tabla = document.getElementById("tableHistorialAct");
             var csv = [];
-
-            // Obtener las filas de la tabla
             var filas = tabla.rows;
 
-            // Recorrer las filas
             for (var i = 0; i < filas.length; i++) {
                 var fila = [];
                 var celdas = filas[i].cells;
 
-                // Recorrer las celdas de cada fila
                 for (var j = 0; j < celdas.length; j++) {
                     fila.push(celdas[j].innerText);
                 }
 
-                // Agregar la fila al CSV
                 csv.push(fila.join(','));
             }
 
-            // Crear el contenido del archivo CSV
             var csvContenido = csv.join('\n');
 
-            // Crear un enlace temporal para descargar el archivo CSV
             var enlaceTemporal = document.createElement('a');
             enlaceTemporal.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContenido);
             enlaceTemporal.target = '_blank';
             enlaceTemporal.download = 'tableHistorialAct.csv';
 
-            // Simular un clic en el enlace temporal
             document.body.appendChild(enlaceTemporal);
             enlaceTemporal.click();
             document.body.removeChild(enlaceTemporal);
         }
 
         function excelHAct() {
-            // Seleccionar la tabla
             var tabla = document.getElementById("tableHistorialAct");
-
-            // Crear un objeto de hoja de cálculo de Excel
             var tablaExcel = '<table>';
 
-            // Recorrer cada fila de la tabla
             for (var i = 0; i < tabla.rows.length; i++) {
                 tablaExcel += '<tr>';
-                // Recorrer cada celda de la fila
                 for (var j = 0; j < tabla.rows[i].cells.length; j++) {
                     tablaExcel += '<td>' + tabla.rows[i].cells[j].innerText + '</td>';
                 }
@@ -112,26 +181,22 @@
 
             tablaExcel += '</table>';
 
-            // Crear un enlace temporal
             var enlaceTemporal = document.createElement('a');
             enlaceTemporal.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(tablaExcel);
             enlaceTemporal.download = 'tableHistorialAct.xls';
 
-            // Simular un clic en el enlace temporal
             document.body.appendChild(enlaceTemporal);
             enlaceTemporal.click();
             document.body.removeChild(enlaceTemporal);
         }
 
         async function imprimirTablaHAct() {
-            // Selecciona el contenedor de la tabla
             let data = await api.get("/historial");
-            // Crea un nuevo elemento de ventana de impresión y coloca la tabla dentro de él
             var ventanaImpresion = window.open('', '_blank');
             var TablaHist = document.createElement("table");
             TablaHist.style.width = "100%";
             TablaHist.style.textAlign = "center";
-            TablaHist.style.border = "1px solid black"
+            TablaHist.style.border = "1px solid black";
             TablaHist.style.borderCollapse = "collapse";
             var trOutH = document.createElement("tr");
             var thIdH = document.createElement("th");
@@ -174,6 +239,10 @@
                 var tdEvento = document.createElement("td");
                 var tdFechaC = document.createElement("td");
 
+                const fechaHora = new Date(element.created_at);
+                const fecha = fechaHora.toLocaleDateString();
+                const hora = fechaHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
                 tdIdH.textContent = element.id;
                 tdCor.textContent = element.coordenadas;
                 tdVel.textContent = element.velocidad;
@@ -181,7 +250,7 @@
                 tdPat.textContent = element.driver && element.driver.vehicle ? element.driver.vehicle.patente : "";
                 tdNomEmp.textContent = element.driver && element.driver.company ? element.driver.company.nombre : "";
                 tdEvento.textContent = element.event ? element.event.evento : "";
-                tdFechaC.textContent = element.created_at;
+                tdFechaC.textContent = fecha; // Mostrar solo la fecha
 
                 trInH.appendChild(tdIdH);
                 trInH.appendChild(tdCor);
@@ -192,17 +261,14 @@
                 trInH.appendChild(tdEvento);
                 trInH.appendChild(tdFechaC);
 
-
                 TablaHist.appendChild(trInH);
             });
 
-
-            // Imprime la ventana de impresión
             ventanaImpresion.document.body.appendChild(TablaHist);
             ventanaImpresion.print();
             ventanaImpresion.close();
-
         }
+
         function copiarHAct() {
             var tabla = document.getElementById("tableHistorialAct");
             var seleccion = window.getSelection();
@@ -213,6 +279,5 @@
             document.execCommand("copy");
             seleccion.removeAllRanges();
         }
-
     </script>
 </div>
