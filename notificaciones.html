@@ -19,11 +19,12 @@
         <table id="tablanoti">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Velocidad</th>
-                    <th>Patente</th>
-                    <th>Tipo</th>
+                    <th>ID Tracker</th>
                     <th>Fecha</th>
+                    <th>Patente</th>
+                    <th>Conductor</th>
+                    <th>Velocidad</th>
+                    <th>Coordenadas</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,57 +34,67 @@
 
 </div>
 
+
 <script>
     $(document).ready(function () {
-        const api = getApi();
-        const baseUrl = api.baseUrl;
-        // Función para cargar la tabla de notificaciones
-        function loadNotificationTable() {
-            tablenoti.ajax.reload();
-        }
+    // Configuración de la API y métodos necesarios
+    const api = {
+        baseUrl: 'https://control-jornada.wit.la/backend-control-jornada/public/api/',
+        // Asumiendo que la función getApi() devuelve el objeto con el método get para hacer solicitudes HTTP
+        get: axios.get
+    };
 
-        // Inicialización de DataTable y configuración de la tabla de notificaciones
-        let tablenoti = $("#tablanoti").DataTable({
-            "ajax": {
-                "url": baseUrl + "alerta",
-                "dataSrc": "",
-                "beforeSend": function (xhr) {
-                    var token = localStorage.getItem("token");
-                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                }
-            },
-            "columns": [
-                { "data": "id" },
-                { "data": "vehicle_log.velocidad" },
-                { "data": "vehicle_log.vehicle.patente" },
-                {
-                    "data": "vehicle_log.velocidad",
-                    "render": function (data, type, row) {
-                        if (data > 45 && data < 50) {
-                            return 'Informativa';
-                        } else if (data >= 50 && data < 55) {
-                            return 'Advertencia';
-                        } else if (data >= 55) {
-                            return 'Crítica';
-                        }
-                    }
-                },
-                { "data": "formatted_updated_at" }
-            ],
-            "order": [[0, "desc"]], // Ordena la primera columna (ID) de manera descendente
-            "language": {
-                // "url": "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+    // Función para cargar la tabla de notificaciones
+    function loadNotificationTable() {
+        tablenoti.ajax.reload(function () {
+        });
+    }
+
+    // Inicialización de DataTable y configuración de la tabla de notificaciones
+    let tablenoti = $("#tablanoti").DataTable({
+        "ajax": {
+            "url": api.baseUrl + "gpsalert", // URL para obtener los datos de las alertas GPS
+            "dataSrc": "", // Especifica que los datos devueltos son directamente el array de objetos
+            "beforeSend": function (xhr) { // Función que se ejecuta antes de enviar la solicitud AJAX
+                var token = localStorage.getItem("token"); // Obtener el token de localStorage
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token); // Agregar el token al encabezado de la solicitud
             }
-        });
-
-
-        //funciones para Botones 
-
-        // Agregar evento de clic al botón de recargar tabla
-        $("#reloadTableBtn").click(function () {
-            loadNotificationTable();
-        });
+        },
+        "columns": [ // Definición de las columnas y los datos que deben mostrar
+            { "data": "id_tracker" }, // Columna para el ID de la alerta
+            { "data": "fecha" }, // Columna para la fecha de la alerta
+            { "data": "patente" }, // Columna para la patente del vehículo
+            { "data": "conductor" }, // Columna para el nombre del conductor
+            { "data": "speed" }, // Columna para la velocidad registrada
+            { // Columna para las coordenadas de ubicación
+                "data": "location",
+                "render": function (data, type, row) {
+                    return `[${data.lat}, ${data.lng}]`; // Formato simple de las coordenadas
+                }
+            }
+        ],
+        "order": [[0, "desc"]], // Ordena la primera columna (ID) de manera descendente por defecto
+        "language": {
+            // "url": "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+        }
     });
+
+    // Evento que se ejecuta después de que la tabla se haya cargado por completo
+    tablenoti.on('draw', function () {
+        $("#loadingscreen").hide(); // Ocultar pantalla de carga después de cargar la tabla
+    });
+
+    // Funciones para botones
+
+    // Agregar evento de clic al botón de recargar tabla
+    $("#reloadTableBtn").click(function () {
+        loadNotificationTable(); // Llama a la función para recargar la tabla
+    });
+});
+
+
+
+
     //funcion boton csv 
     function exportarCSVNoti() {
         var tabla = document.getElementById("tablanoti");

@@ -170,7 +170,7 @@
             if (!element.smartcard || element.smartcard.id == tarjetas.id) {
                 const optcond = document.createElement("option");
                 optcond.value = element.id;
-                optcond.textContent = element.rut;
+                optcond.textContent = element.nombre;
                 form.rut.appendChild(optcond)
             }
         });
