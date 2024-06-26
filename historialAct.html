@@ -105,20 +105,19 @@
             });
         });
 
-
         function filtrarPorFechas() {
             const fechaDesdeInput = document.getElementById("fecha-desde").value;
             const fechaHastaInput = document.getElementById("fecha-hasta").value;
 
-            // Convertir las fechas del formato DD/MM/YYYY a YYYY-MM-DD para la comparación
-            const fechaDesdeParts = fechaDesdeInput.split("-");
-            const fechaDesdeFormatted = `${fechaDesdeParts[0]}-${fechaDesdeParts[1]}-${fechaDesdeParts[2]}`;
-            const fechaHastaParts = fechaHastaInput.split("-");
-            const fechaHastaFormatted = `${fechaHastaParts[0]}-${fechaHastaParts[1]}-${fechaHastaParts[2]}`;
-
             // Convertir las fechas a objetos Date
-            const dateDesde = fechaDesdeInput ? new Date(fechaDesdeFormatted) : null;
-            const dateHasta = fechaHastaInput ? new Date(fechaHastaFormatted) : null;
+            const dateDesde = fechaDesdeInput ? new Date(fechaDesdeInput) : null;
+            const dateHasta = fechaHastaInput ? new Date(fechaHastaInput) : null;
+
+            // Validar que la fecha "Desde" no sea mayor que la fecha "Hasta"
+            if (dateDesde && dateHasta && dateDesde > dateHasta) {
+                alert("La fecha 'Desde' no puede ser mayor que la fecha 'Hasta'.");
+                return; 
+            }
 
             // Filtrar los datos de la tabla
             tableHistAct.rows().every(function () {
@@ -133,11 +132,6 @@
                 }
             });
         }
-
-
-
-
-
 
         function exportarCSVHAct() {
             var tabla = document.getElementById("tableHistorialAct");

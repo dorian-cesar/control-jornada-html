@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset</title>
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!--Mapa-->
+
+    <style>
+        .error-message {
+            color: red;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="pageLogin">
+        <div style="text-align: center;">
+
+        </div>
+        <div class="panelCentral">
+            <div>
+                <form class="login-container" id="formLogin">
+                    <h1 style="margin-left: 10%;">Recuperacion de Password</h1>
+
+                    <div class="form-login">
+                        <i class="fa fa-envelope"></i>
+                        <input type="email" class="login" name="usuario" placeholder="Correo" id="usuario">
+                    </div>
+                    <div class="form-login">
+                        <i class="fa fa-key"></i>
+                        <input type="password" class="login" name="newPassword" placeholder="Nueva Contraseña"
+                            id="newPassword">
+                            <i class="fa fa-eye" id="togglePassword" style="cursor: pointer; margin-left: -45px; color: grey; font-size: 0.8em;"></i>
+                    </div>
+                    <div class="form-login">
+                        <i class="fa fa-check-circle"></i>
+                        <input type="password" class="login" name="confirmPassword" placeholder="Confirmar Contraseña"
+                            id="confirmPassword">
+                        <i class="fa fa-eye" id="togglePassword2"
+                            style="cursor: pointer; margin-left: -45px; color: grey; font-size: 0.8em;"></i>
+                    </div>
+
+                    <div class="form-info">
+                        <button class="btnCrear" id="btnConfirmar">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const togglePassword1 = document.getElementById('togglePassword');
+            const togglePassword2 = document.getElementById('togglePassword2');
+            const password1 = document.getElementById('newPassword');
+            const password2 = document.getElementById('confirmPassword');
+
+            togglePassword1.addEventListener('click', function () {
+                togglePassword(password1, togglePassword1);
+            });
+
+            togglePassword2.addEventListener('click', function () {
+                togglePassword(password2, togglePassword2);
+            });
+
+            function togglePassword(passwordInput, toggleIcon) {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                toggleIcon.classList.toggle('fa-eye');
+                toggleIcon.classList.toggle('fa-eye-slash');
+            }
+
+            // Función para obtener parámetros de la URL por nombre
+            function getUrlParameter(name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                var results = regex.exec(window.location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            }
+
+            // Evento click del botón Confirmar
+            document.getElementById('btnConfirmar').addEventListener('click', function (event) {
+                event.preventDefault(); // Evita que el formulario se envíe por defecto
+
+                // Obtener valores actuales de los campos
+                const email = document.getElementById('usuario').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const token = getUrlParameter('token');
+
+                // Validación de longitud mínima de contraseña
+                if (newPassword.length < 8) {
+                    alert('La contraseña debe tener al menos 8 caracteres');
+                    return;
+                }
+
+                // Validación de coincidencia de contraseñas
+                if (newPassword !== confirmPassword) {
+                    alert('Las contraseñas no coinciden');
+                    return;
+                }
+
+                // Datos a enviar en la solicitud POST
+                const formData = {
+                    token: token,
+                    email: email,
+                    password: newPassword,
+                    password_confirmation: confirmPassword
+                };
+
+                // Mostrar en consola lo que se enviará
+                console.log('Datos a enviar:', formData);
+
+                // Enviar solicitud POST con Axios
+                axios.post('https://control-jornada.wit.la/backend-control-jornada/public/api/password/reset', formData)
+                    .then(function (response) {
+                        console.log('Contraseña restablecida correctamente', response.data);
+                        alert('Contraseña restablecida correctamente');
+                        // Redirigir al usuario al index.html después de 1 segundo
+                        setTimeout(function () {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    })
+                    .catch(function (error) {
+                        if (error.response) {
+                            // El servidor ha respondido con un status de error
+                            console.error('Error al restablecer la contraseña', error.response.status);
+                            console.error('Detalles del error:', error.response.data);
+                            alert('Error al restablecer la contraseña: ' + error.response.data.message);
+                        } else if (error.request) {
+                            // La solicitud fue hecha pero no se recibió respuesta
+                            console.error('No se recibió respuesta del servidor');
+                            alert('No se recibió respuesta del servidor');
+                        } else {
+                            // Otro tipo de error ocurrió
+                            console.error('Error al realizar la solicitud', error.message);
+                            alert('Error al realizar la solicitud: ' + error.message);
+                        }
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>

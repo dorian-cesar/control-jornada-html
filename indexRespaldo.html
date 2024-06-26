@@ -16,23 +16,19 @@
 </head>
 
 <body>
-
     <div id="pageLogin">
         <div style="text-align: center;"></div>
         <div class="panelCentral">
             <div>
                 <form class="login-container" id="formLogin">
                     <h1 style="margin-left: 10%;">Ingreso a Plataforma</h1>
-
                     <div class="form-login">
                         <i class="fa fa-user-circle-o"></i>
                         <input type="email" class="login" name="usuario" placeholder="Usuario" id="usuario">
                     </div>
                     <div class="form-login">
                         <i class="fa fa-key"></i>
-                        <input type="password" class="login" name="password" placeholder="Contraseña" id="password"><i
-                            class="fa fa-eye" id="togglePassword"
-                            style="cursor: pointer; margin-left: -35px; color: grey; font-size: 0.8em;"></i>
+                        <input type="password" class="login" name="password" placeholder="Contraseña" id="password">
                     </div>
                     <div class="rpass">
                         <a href="#" onclick="modalRecuperarPass()">Recuperar contraseña</a>
@@ -42,7 +38,6 @@
                     </div>
                 </form>
             </div>
-
         </div>
         <!-- Modal: Formulario para recuperar contraseña -->
         <div class="mdl-overlay" id="recPass-overlay" onclick="closeModal('recPass')"></div>
@@ -56,62 +51,71 @@
                     </div>
                     <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
                 </div>
+            </form>
         </div>
-        </form>
     </div>
+
     <script>
 
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const formRecPass = document.getElementById('formRecPass');
-            formRecPass.addEventListener("submit", (e) => {
-                e.preventDefault();
-                const email = document.getElementById('mail').value;
-
-                axios.post('https://control-jornada.wit.la/backend-control-jornada/public/api/password/email', {
-                    email: email
+        async function modalRecuperarPass() {
+            const form = document.getElementById('formRecPass');
+            openModal('recPass');
+        }
+        //enviar el formulario para recuperar contraseña 
+        // Agrega un event listener para el evento de submit del formulario
+        const recPassForm = document.getElementById('formRecPass')
+        recPassForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Evita que el formulario se envíe automáticamente
+            // Obtiene los datos del formulario y los coloca en un objeto
+            datos = {
+                email: recPassForm.mail.value,
+                url: window.location.origin,
+            }
+            // Realiza una solicitud fetch para enviar los datos del formulario a un archivo PHP en el servidor
+            fetch('http://localhost/control_jornada-main/php/recuperaPass.php', {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(datos) // Convierte los datos a formato JSON y los envía en el cuerpo de la solicitud
+            })
+                .then(reply => {
+                    return reply.text(); // Convierte la respuesta a texto
                 })
-                    .then(response => {
-                        if (response.status === 200) {
-                            alert("Correo de Recuperación de Password Enviado");
-                            closeModal('recPass');
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        alert("El Correo Ingresado NO es Valido");
-                    });
-            });
+                .then(msg => {
+                    alert('Enviado correctamente'); // Muestra una alerta indicando que el formulario se envió correctamente
+                    // Limpia los campos del formulario después de enviarlo
+                    recPassForm.mail.value = '';
+
+                })
+                .then(data => {
+                    closeModal("recPass");
+                })
+                .catch(error => {
+                    console.log(error); // Si hay un error, lo muestra en la consola del navegador
+                });
         });
 
 
 
         const FormLogin = document.getElementById('formLogin');
-
         FormLogin.addEventListener("submit", (e) => {
             e.preventDefault();
-
-            // Obtener datos del formulario
-            const email = FormLogin.usuario.value;
-            const password = FormLogin.password.value;
-
-            // Objeto con los datos a enviar en la solicitud POST
-            const datos = {
-                email: email,
-                password: password,
-            };
-
-            // Realizar la solicitud POST al servidor
+            datos = {
+                email: FormLogin.usuario.value,
+                password: FormLogin.password.value,
+            }
             fetch(`https://control-jornada.wit.la/backend-control-jornada/public/api/login`, {
                 method: "post",
                 headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(datos),
+                    "content-type": "application/json",
+                }, body: JSON.stringify(datos),
             })
                 .then(reply => {
                     if (!reply.ok) {
                         if (reply.status === 401) {
-                            window.alert("El usuario o la contraseña son incorrectos");
+                            window.alert("Este usuario no existe");
                         } else {
                             window.alert("Ha ocurrido un error en la solicitud");
                         }
@@ -119,21 +123,19 @@
                     }
                     return reply.json();
                 })
+
                 .then(data => {
-                    // Almacenar datos en localStorage
                     localStorage.setItem("token", data.token);
                     localStorage.setItem("level", data.level);
                     localStorage.setItem("name", data.name);
-                    localStorage.setItem("id", data.id);
-
-                    // Redirigir a la página de la aplicación
+                    localStorage.setItem("id", data.id)
                     location.href = "app.html";
+
                 })
                 .catch(error => {
-                    console.error('Error en la solicitud:', error);
-                });
-        });
 
+                })
+        })
 
         function openModal(modal) {
             // Muestra el overlay y el modal correspondiente cambiando su estilo de visualización a "block"
@@ -146,21 +148,6 @@
             document.getElementById(modal + '-modal').style.display = 'none';
         }
 
-        function modalRecuperarPass() {
-            openModal('recPass');
-        }
-
-        const togglePassword = document.getElementById('togglePassword');
-        const password = document.getElementById('password');
-
-        togglePassword.addEventListener('click', function (e) {
-            // Alterna el tipo de input
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            // Alterna el icono
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
-        });
     </script>
 
 </body>

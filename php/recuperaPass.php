@@ -12,10 +12,8 @@ if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
     exit;
 }
 
-
 // Importa las clases de PHPMailer necesarias
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 include("./conf.php");
@@ -35,33 +33,33 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             // Decodifica los datos JSON
             $data = json_decode($json_data, true);
             // Extrae los valores del array JSON
-            $mail= $data['mail'];
-
+            $mail = $data['mail'];
+            $email = "drokuas@gmail.com";
             // Crea una instancia de PHPMailer
-            $phpmailer = new PHPMailer();
+            $phpmailer = new PHPMailer(true); // Habilita excepciones
             // Configura el envío SMTP
             $phpmailer->isSMTP();
-            $phpmailer->Host = 'mail.ringring.cl';
+            $phpmailer->Host = 'smtp.gmail.com';
             $phpmailer->SMTPAuth = true;
-            $phpmailer->Port = 465;
-            $phpmailer->Username = 'dgonzalez@ringring.cl';
-            $phpmailer->Password = $mailpass;
+            $phpmailer->Port = 587;
+            $phpmailer->Username = 'mailer.wit@gmail.com';
+            $phpmailer->Password = $mailpass; // Verifica que $mailpass está correctamente definido en conf.php
             $phpmailer->CharSet = "UTF-8";
             $phpmailer->Encoding = 'base64';
-            $phpmailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-    
+            $phpmailer->SMTPSecure = 'tls';
+
             // Establece la dirección de correo remitente
-            $phpmailer->setFrom('dgonzalez@ringring.cl');
+            $phpmailer->setFrom('desarrollo.wit@gmail.com', 'Desarrollo Wit');
 
             // Agrega la dirección de correo destinatario
-            $phpmailer->addAddress('carolinaherrera.esc@gmail.com');
+            $phpmailer->addAddress($mail);
 
             // Configura el correo en formato HTML
             $phpmailer->isHTML(true);
             // Establece el asunto del correo
             $phpmailer->Subject = "recuperar contraseña";
             // Establece el cuerpo del correo
-            $phpmailer->Body    = "
+            $phpmailer->Body = "
             mail = $mail <BR>
 
             $formText            
@@ -72,13 +70,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             // Envía el correo
             $phpmailer->send();
             // Muestra un mensaje de éxito
-            echo "Enviado correctamente";
-        } catch(Exception $e){
+            echo json_encode(["status" => "success", "message" => "Correo Enviado Correctamente"]);
+        } catch (Exception $e) {
             // En caso de error, muestra el mensaje de error
-            echo $phpmailer->ErrorInfo;
+            echo json_encode(["status" => "error", "message" => $phpmailer->ErrorInfo]);
         }
-        
+
+    } else {
+        echo json_encode(["status" => "error", "message" => "No se recibieron datos JSON"]);
     }
 }
-
 ?>

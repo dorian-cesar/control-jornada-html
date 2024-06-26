@@ -1,381 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de jornada</title>
-    <link rel="stylesheet" href="css/default.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!--Mapa-->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="main.js"></script>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de jornada</title>
+  <link rel="stylesheet" href="css/default.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!--Mapa-->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script src="main.js"></script>
 </head>
+
 <body>
-<body>
-<div id="navbar">
-    <div id="Logo">
-      <img src="img/wit_logo.png" class="logo" alt="Logo" >
-    </div> 
-    
-</div>
- <!--Sidebar-->
-<div id="sidebar" class="sidebar">
-  <!--Panel de control -->
-    <a href="#" onclick="panelControl()" class="mainside">Panel de Control</a>
-    <a href="#" id="pcMapa" onclick="mapa()" class="subside" ><i class="fa fa-globe fa-fw"></i>Mapa</a>
-    <a href="#" id="pcEstado" onclick="estado()" class="subside"><i class="fa fa-check fa-fw"></i>Estado</a>
-    <a href="#" id="pcNotificaciones" onclick="notificaciones()" class="subside"><i class="fa fa-bell-o fa-fw"></i>Notificaciones</a>
-<!--Gestion de onductores -->
-    <a href="#" onclick="switchside('gc')" class="mainside"><i class="fa fa-chevron-down"></i> Gestion de Conductores</a>
-    <a href="#" id="gcPerfil" onclick="perfilConductor()" class="subside2" ><i class="fa fa-address-card fa-fw"></i>Perfil Conductores</a>
-    <a href="#" id="gcTarjetas" onclick="tarjetas()" class="subside2"><i class="fa fa-id-card-o fa-fw"></i>Tarjetas</a>
-    <a href="#" id="gcHistorial" onclick="historialAct()" class="subside2"><i class="fa fa-history fa-fw"></i>Historial</a>
-<!--visualizacion -->
-    <a href="#" onclick="switchside('vz')" class="mainside"><i class="fa fa-chevron-down"></i> Visualización</a>
-    <a href="#" id="vzMapa" onclick="mapaInteractivo()" class="subside2"><i class="fa fa-globe fa-fw"></i>Mapa Interactivo</a>
-    <a href="#" id="vzTiempo" onclick="tiempoReal()" class="subside2"><i class="fa fa-clock-o fa-fw"></i>Estado en tiempo real</a>
-<!--Gestion de informes -->
-    <a href="#" onclick="switchside('gi')" class="mainside"><i class="fa fa-chevron-down"></i> Gestion de Informes</a>
-    <a href="#" id="giInfoGen" onclick="infoGeneral()" class="subside2"><i class="fa fa-file fa-fw"></i>Informe General</a>
-    <a href="#" id="giVelocidad" onclick="velocidad()" class="subside2"><i class="fa fa-file-text fa-fw"></i>Informe de Velocidad</a>
-    <a href="#" id="giMarcacion" onclick="marcacion()" class="subside2"><i class="fa fa-file-text-o fa-fw"></i>Informe de Marcación</a>
-    <a href="#" id="giHistorial" onclick="historialInfo()" class="subside2"><i class="fa fa-folder-open fa-fw"></i>Historial de Informes</a>
-<!--Configuracion de sitema-->
-    <a href="#" onclick="switchside('cs')" class="mainside"><i class="fa fa-chevron-down"></i> Configuración de Sistema</a>
-    <a href="#"  id="csNotificacion" onclick="alertasNot()" class="subside2"><i class="fa fa-bell fa-fw"></i>Alertas y Notificaciones</a>
-    <a href="#"  id="csVehiculo" onclick="vehiculo()" class="subside2"><i class="fa fa-bus"></i> Vehiculos </a>
-    <a href="#"  id="csEmpresa" onclick="empresas()" class="subside2"><i class="fa fa-building"></i> Empresas </a>
-    <a href="#"  id="csUsuario" onclick="usuarios()" class="subside2" ><i class="fa fa-user-circle-o"></i> Usuarios </a>
-  </div>    
-<div class="content" id="content">
-    <div id="menu-toggle"><i class="fa fa-bars fa-fw"></i>Menú</div>
-        <div id="contenedorPanelControl"></div>
-        <div id="contenedorMapa"></div>
-        <div id="contenedorEstado"></div>
-        <div id="contenedorNotificaciones"></div>
-        <div id="contenedorPerfilConductor"></div>
-        <div id="contenedorTarjetas"></div>
-        <div id="contenedorHistorial"></div>
-        <div id="contenedorMapaInteractivo"></div>
-        <div id="contenedorEstadoTiempoReal"></div>
-        <div id="contenedorInformeGeneral"></div>
-        <div id="contenedorInformeVelocidad"></div>
-        <div id="contenedorInformeMarcacion"></div>
-        <div id="contenedorHistorialInformes"></div>
-        <div id="contenedorAlertasNotificaciones"></div>
-        <div id="contenedorVehiculos"></div>
-        <div id="contenedorEmpresas"></div>
-        <div id="contenedorUsuarios"></div>
+
+  <body>
+    <div id="navbar">
+      <div id="Logo">
+        <img src="img/wit_logo.png" class="logo" alt="Logo">
+      </div>
+
     </div>
-<!--Sidebar usuario-->
+    <!--Sidebar-->
+    <div id="sidebar" class="sidebar">
+      <!--Panel de control -->
+      <a href="#" onclick="panelControl()" class="mainside">Panel de Control</a>
+      <a href="#" id="pcMapa" onclick="mapa()" class="subside"><i class="fa fa-globe fa-fw"></i>Mapa</a>
+      <a href="#" id="pcEstado" onclick="estado()" class="subside"><i class="fa fa-check fa-fw"></i>Estado</a>
+      <a href="#" id="pcNotificaciones" onclick="notificaciones()" class="subside"><i
+          class="fa fa-bell-o fa-fw"></i>Notificaciones</a>
+      <!--Gestion de onductores -->
+      <a href="#" onclick="switchside('gc')" class="mainside"><i class="fa fa-chevron-down"></i> Gestion de
+        Conductores</a>
+      <a href="#" id="gcPerfil" onclick="perfilConductor()" class="subside2"><i
+          class="fa fa-address-card fa-fw"></i>Perfil Conductores</a>
+      <a href="#" id="gcTarjetas" onclick="tarjetas()" class="subside2"><i
+          class="fa fa-id-card-o fa-fw"></i>Tarjetas</a>
+      <a href="#" id="gcHistorial" onclick="historialAct()" class="subside2"><i
+          class="fa fa-history fa-fw"></i>Historial</a>
+      <!--visualizacion -->
+      <a href="#" onclick="switchside('vz')" class="mainside"><i class="fa fa-chevron-down"></i> Visualización</a>
+      <a href="#" id="vzMapa" onclick="mapaInteractivo()" class="subside2"><i class="fa fa-globe fa-fw"></i>Mapa
+        Interactivo</a>
+      <a href="#" id="vzTiempo" onclick="tiempoReal()" class="subside2"><i class="fa fa-clock-o fa-fw"></i>Estado en
+        tiempo real</a>
+      <!--Gestion de informes -->
+      <a href="#" onclick="switchside('gi')" class="mainside"><i class="fa fa-chevron-down"></i> Gestion de Informes</a>
+      <a href="#" id="giInfoGen" onclick="infoGeneral()" class="subside2"><i class="fa fa-file fa-fw"></i>Informe
+        General</a>
+      <a href="#" id="giVelocidad" onclick="velocidad()" class="subside2"><i class="fa fa-file-text fa-fw"></i>Informe
+        de Velocidad</a>
+      <a href="#" id="giMarcacion" onclick="marcacion()" class="subside2"><i class="fa fa-file-text-o fa-fw"></i>Informe
+        de Marcación</a>
+      <a href="#" id="giHistorial" onclick="historialInfo()" class="subside2"><i
+          class="fa fa-folder-open fa-fw"></i>Historial de Informes</a>
+      <!--Configuracion de sitema-->
+      <a href="#" onclick="switchside('cs')" class="mainside"><i class="fa fa-chevron-down"></i> Configuración de
+        Sistema</a>
+      <a href="#" id="csNotificacion" onclick="alertasNot()" class="subside2"><i class="fa fa-bell fa-fw"></i>Alertas y
+        Notificaciones</a>
+      <a href="#" id="csVehiculo" onclick="vehiculo()" class="subside2"><i class="fa fa-bus"></i> Vehiculos </a>
+      <a href="#" id="csEmpresa" onclick="empresas()" class="subside2"><i class="fa fa-building"></i> Empresas </a>
+      <a href="#" id="csUsuario" onclick="usuarios()" class="subside2"><i class="fa fa-user-circle-o"></i> Usuarios </a>
+    </div>
+    <div class="content" id="content">
+      <div id="menu-toggle"><i class="fa fa-bars fa-fw"></i>Menú</div>
+      <div id="contenedorPanelControl"></div>
+      <div id="contenedorMapa"></div>
+      <div id="contenedorEstado"></div>
+      <div id="contenedorNotificaciones"></div>
+      <div id="contenedorPerfilConductor"></div>
+      <div id="contenedorTarjetas"></div>
+      <div id="contenedorHistorial"></div>
+      <div id="contenedorMapaInteractivo"></div>
+      <div id="contenedorEstadoTiempoReal"></div>
+      <div id="contenedorInformeGeneral"></div>
+      <div id="contenedorInformeVelocidad"></div>
+      <div id="contenedorInformeMarcacion"></div>
+      <div id="contenedorHistorialInformes"></div>
+      <div id="contenedorAlertasNotificaciones"></div>
+      <div id="contenedorVehiculos"></div>
+      <div id="contenedorEmpresas"></div>
+      <div id="contenedorUsuarios"></div>
+    </div>
+    <!--Sidebar usuario-->
     <div id="sidebar-user" class="sidebar-user">
-      <a href="#" onclick="infoUserModal()" class="mainside-user" >Información</a>
+      <a href="#" onclick="infoUserModal()" class="mainside-user">Información</a>
       <a href="#" onclick="passUserModal()" class="mainside-user">Cambiar Contraseña</a>
       <a href="#" onclick="logOut()" class="mainside-user">Cerrar Sesion</a>
-  </div> 
-  <div class="content-user">
-    <div id="user-toggle"><i class="fa fa-user-circle-o"></i> <i id="userName">Usuario</i><i class="fa fa-chevron-down"></i></div>
-        <div id="contenedorInformacion"></div>
-        <div id="contenedorContraseña"></div>
-        <div id="contenedorLogout"></div>
-</div>
+    </div>
+    <div class="content-user">
+      <div id="user-toggle"><i class="fa fa-user-circle-o"></i> <i id="userName">Usuario</i><i
+          class="fa fa-chevron-down"></i></div>
+      <div id="contenedorInformacion"></div>
+      <div id="contenedorContraseña"></div>
+      <div id="contenedorLogout"></div>
+    </div>
 
- <!-- Modal: informacion de usuario  -->
- <div class="mdl-overlay" id="infoUser-overlay" onclick="closeModal('infoUser')"></div>
- <div class="mdl-content" id="infoUser-modal">
- <h1 class="tituloModal"><i class="fa fa-user-circle-o"></i>&nbsp;Usuario </h1>
- <form onsubmit="" method="post" id="formInfoUser">
-     <div class="form-cont">
-     <div class="form-group">
-         <i>Nombre:</i>
-         <input type="text" name="nombre"  placeholder="No Name" required/>
+    <!-- Modal: informacion de usuario  -->
+    <div class="mdl-overlay" id="infoUser-overlay" onclick="closeModal('infoUser')"></div>
+    <div class="mdl-content" id="infoUser-modal">
+      <h1 class="tituloModal"><i class="fa fa-user-circle-o"></i>&nbsp;Usuario </h1>
+      <form onsubmit="" method="post" id="formInfoUser">
+        <div class="form-cont">
+          <div class="form-group">
+            <i>Nombre:</i>
+            <input type="text" name="nombre" placeholder="No Name" required />
+          </div>
+          <div class="form-group">
+            <i>nivel:</i>
+            <input type="text" name="level" placeholder="xxxx" required />
+          </div>
+          <div class="form-group">
+            <i>Correo:</i>
+            <input type="text" name="email" placeholder="ejemplo@correo.com" required />
+          </div>
+
+        </div>
+      </form>
+    </div>
+    <!-- Modal: Cambiar Contraseña   -->
+    <div class="mdl-overlay" id="passUser-overlay" onclick="closeModal('passUser')"></div>
+    <div class="mdl-content" id="passUser-modal">
+      <h1 class="tituloModal"><i class="fa fa-key"></i>&nbsp;Cambiar Contraseña </h1>
+      <form onsubmit="" method="post" id="formPassUser">
+        <div class="form-cont">
+          <div class="form-group">
+            <i>Usuario:</i>
+            <input type="text" name="user" placeholder="Usuario" required />
+          </div>
+          <div class="form-group">
+            <i>Contraseña Anterior :</i>
+            <input type="password" name="pass" required />
+          </div>
+          <div class="form-group">
+            <i>Nueva Contraseña:</i>
+            <input type="password" name="newpass" required />
+          </div>
+          <div class="form-group">
+            <i>Confirmar Contraseña:</i>
+            <input type="password" name="newpass" required />
+          </div>
+          <div class="form-login">
+            <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <!-- notificaciones -->
+    <div class="modal" id="notificationModal">
+      <div class="modal-content">
+        <div class="modalTitle">
+          <span class="close" onclick="closeNotificationModal()">&times;</span>
+          <h3>Notificación <i class="fa fa-bell"></i></h3>
+        </div>
+        <div>
+          <i style="display: inline; text-shadow: 0px 0px 3px black; color: rgb(250, 205, 120);"
+            class="fa fa-exclamation-triangle" id="notificationIcon"></i>
+          <p style="display: inline;" id="notificationMessage"></p>
+        </div>
+
+
+
+
       </div>
-     <div class="form-group">
-         <i>nivel:</i>
-         <input type="text" name="level"  placeholder="xxxx" required/>
-    </div>
-    <div class="form-group">
-      <i>Correo:</i>
-      <input type="text" name="email"  placeholder="ejemplo@correo.com" required/>
+
     </div>
 
-       </div>
- </form>
-</div>
- <!-- Modal: Cambiar Contraseña   -->
- <div class="mdl-overlay" id="passUser-overlay" onclick="closeModal('passUser')"></div>
- <div class="mdl-content" id="passUser-modal">
- <h1 class="tituloModal"><i class="fa fa-key"></i>&nbsp;Cambiar Contraseña </h1>
- <form onsubmit="" method="post" id="formPassUser">
-     <div class="form-cont">
-     <div class="form-group">
-         <i>Usuario:</i>
-         <input type="text" name="user"  placeholder="Usuario" required/>
-     </div>
-     <div class="form-group">
-         <i>Contraseña Anterior :</i>
-         <input type="password" name="pass"   required/>
+
+
+
+    <!-- Pantalla de carga -->
+    <div class="loading-overlay" id="loadingscreen">
+      <br />
+      <br />
+      <br />
+      <i class="fa fa-spinner fa-6 fa-spin"></i>
+      <div class="loading-texto">Cargando</div>
     </div>
-    <div class="form-group">
-      <i>Nueva Contraseña:</i>
-      <input type="password" name="newpass"   required/>
-    </div>
-    <div class="form-group">
-      <i>Confirmar Contraseña:</i>
-      <input type="password" name="newpass"   required/>
-    </div>
-     <div  class="form-login">
-     <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
-     </div>
-     </div>
- </form>
-</div>
-<!-- notificaciones -->
-<div class="modal" id="notificationModal">
-  <div class="modal-content">
-      <div class="modalTitle">
-        <span class="close" onclick="closeNotificationModal()">&times;</span>
-        <h3 >Notificación <i class="fa fa-bell"></i></h3>
+
+    <footer class="footer">
+      <div>
+        <p><i class="fa fa-copyright"></i> Copyright 2024</p>
       </div>
       <div>
-        <i style="display: inline; text-shadow: 0px 0px 3px black; color: rgb(250, 205, 120);" class="fa fa-exclamation-triangle" id="notificationIcon"></i>
-        <p style="display: inline;" id="notificationMessage"></p>
+        <p><i class="fa fa-power-off"></i> Wit.la</p>
       </div>
-      
-      
-    
-    
-  </div>
-  
-</div>
+      <div>
+        <p><i class="fa fa-registered"></i> Todos los derechos reservados</p>
+      </div>
+    </footer>
+  </body>
 
 
-
-
-<!-- Pantalla de carga -->
-<div class="loading-overlay" id="loadingscreen">
-  <br/>
-  <br/>
-  <br/>
-  <i class="fa fa-spinner fa-6 fa-spin"></i>
-  <div class="loading-texto">Cargando</div>
-</div>
-
-<footer class="footer">
-  <div > 
-  <p><i class="fa fa-copyright"></i> Copyright 2024</p>
-  </div>
-  <div>
-  <p><i class="fa fa-power-off"></i> Wit.la</p>
-  </div>
-  <div>
-  <p><i class="fa fa-registered"></i> Todos los derechos reservados</p>
-  </div>
-</footer>
-</body>
-
-
-<script>
-  // Se importa la librería axios para manejar peticiones HTTP
-  const api= axios.create({
-    baseURL: "https://control-jornada.wit.la/backend-control-jornada/public/api",// Se define la URL base de la API
-    headers: {
-      'content-type':'application/json',// Se establece el tipo de contenido como JSON
-    }
-  });
-  // Se define un interceptor de petición para agregar el token de autorización a las solicitudes
-  api.interceptors.request.use(config=>{
-    const token= localStorage.getItem("token");
-    if(token){
-      config.headers.authorization=`Bearer ${token}`;
-    }
-    return config;
-  })
-  // Verifica si el nombre de usuario está en el almacenamiento local y lo muestra en la interfaz
-  if(localStorage.getItem("name")){
- 
-    document.getElementById("userName").textContent=localStorage.getItem("name");
-    console.log();
-  }
-  
-// Si no hay un token de autorización en el almacenamiento local, redirige a la página de inicio de sesión
-  if(!localStorage.getItem("token")){
-    location.href="index.html";
-  }
-// Controla la apertura y el cierre del menú principal de la interfaz
-     $('#menu-toggle').on('click', function() {
-    var sidebar = document.getElementById('sidebar');
-    var content = document.getElementById('content');
-   
-
-    if (sidebar.style.left === '0px') {
-      sidebar.style.left = '-200px';
-      content.style.marginLeft = '0';
-       } else {
-      sidebar.style.left = '0px';
-      content.style.marginLeft = '200px';
-     
-    }
+  <script>
+    // Se importa la librería axios para manejar peticiones HTTP
+    const api = axios.create({
+      baseURL: "https://control-jornada.wit.la/backend-control-jornada/public/api",// Se define la URL base de la API
+      headers: {
+        'content-type': 'application/json',// Se establece el tipo de contenido como JSON
+      }
+    });
+    // Se define un interceptor de petición para agregar el token de autorización a las solicitudes
+    api.interceptors.request.use(config => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.authorization = `Bearer ${token}`;
+      }
+      return config;
     })
-  
+    // Verifica si el nombre de usuario está en el almacenamiento local y lo muestra en la interfaz
+    if (localStorage.getItem("name")) {
+
+      document.getElementById("userName").textContent = localStorage.getItem("name");
+      console.log();
+    }
+
+    // Si no hay un token de autorización en el almacenamiento local, redirige a la página de inicio de sesión
+    if (!localStorage.getItem("token")) {
+      location.href = "index.html";
+    }
+    // Controla la apertura y el cierre del menú principal de la interfaz
+    $('#menu-toggle').on('click', function () {
+      var sidebar = document.getElementById('sidebar');
+      var content = document.getElementById('content');
+
+
+      if (sidebar.style.left === '0px') {
+        sidebar.style.left = '-200px';
+        content.style.marginLeft = '0';
+      } else {
+        sidebar.style.left = '0px';
+        content.style.marginLeft = '200px';
+
+      }
+    })
+
+
 
     // Carga de forma asíncrona múltiples páginas HTML en contenedores específicos
-    var loadPage = $.Deferred(function(dfd) {
-    $('#contenedorPanelControl').load('panelControl.html');
-    $('#contenedorMapa').load('mapa.html');
-    $('#contenedorEstado').load('estado.html');
-    $('#contenedorNotificaciones').load('notificaciones.html');
-    $('#contenedorPerfilConductor').load('perfilConductor.html');
-    $('#contenedorTarjetas').load('Tarjeta.html');
-    $('#contenedorHistorial').load('historialAct.html');
-    $('#contenedorMapaInteractivo').load('mapaInteractivo.html');
-    $('#contenedorEstadoTiempoReal').load('tiempoReal.html');
-    $('#contenedorInformeGeneral').load('informeGeneral.html');
-    $('#contenedorInformeVelocidad').load('infoVelocidad.html');
-    $('#contenedorInformeMarcacion').load('infoMarcacion.html');
-    $('#contenedorHistorialInformes').load('historialInfo.html');
-    $('#contenedorInformacion').load('blanco.html');
-    $('#contenedorContraseña').load('blanco.html');
-    $('#contenedorLogout').load('blanco.html');
-    $('#contenedorVehiculos').load('crearVehiculo.html');
-    $('#contenedorEmpresas').load('empresas.html');
-    if(parseInt(localStorage.getItem("level"))>=10){
-      $('#contenedorUsuarios').load('usuarios.html');}
-    $('#contenedorAlertasNotificaciones').load('alertas.html',dfd.resolve);
-    
-  }).promise();
-  loadPage.then( function(){
-     blankPage();
-     // Oculta el elemento de pantalla de carga
-    document.getElementById('loadingscreen').style.display = 'none';
-    panelControl();
-  })
+    var loadPage = $.Deferred(function (dfd) {
+      $('#contenedorPanelControl').load('panelControl.html');
+      $('#contenedorMapa').load('mapa.html');
+      $('#contenedorEstado').load('estado.html');
+      $('#contenedorNotificaciones').load('notificaciones.html');
+      $('#contenedorPerfilConductor').load('perfilConductor.html');
+      $('#contenedorTarjetas').load('Tarjeta.html');
+      $('#contenedorHistorial').load('historialAct.html');
+      $('#contenedorMapaInteractivo').load('mapaInteractivo.html');
+      $('#contenedorEstadoTiempoReal').load('tiempoReal.html');
+      $('#contenedorInformeGeneral').load('informeGeneral.html');
+      $('#contenedorInformeVelocidad').load('infoVelocidad.html');
+      $('#contenedorInformeMarcacion').load('infoMarcacion.html');
+      $('#contenedorHistorialInformes').load('historialInfo.html');
+      $('#contenedorInformacion').load('blanco.html');
+      $('#contenedorContraseña').load('blanco.html');
+      $('#contenedorLogout').load('blanco.html');
+      $('#contenedorVehiculos').load('crearVehiculo.html');
+      $('#contenedorEmpresas').load('empresas.html');
+      if (parseInt(localStorage.getItem("level")) >= 10) {
+        $('#contenedorUsuarios').load('usuarios.html');
+      }
+      $('#contenedorAlertasNotificaciones').load('alertas.html', dfd.resolve);
 
-// Controla la apertura y el cierre del menú de usuario de la interfaz
-  $('#user-toggle').on('click', function() {
-    var sidebar = document.getElementById('sidebar-user');
-    var content = document.getElementById('content-user');
-
-    if (sidebar.style.right === '0px') {
-      sidebar.style.right = '-200px';
-      content.style.marginRight = '0';
-    } else {
-      sidebar.style.right = '0px';
-      content.style.marginRight= '200px';
-    }
+    }).promise();
+    loadPage.then(function () {
+      blankPage();
+      // Oculta el elemento de pantalla de carga
+      document.getElementById('loadingscreen').style.display = 'none';
+      panelControl();
     })
 
-    
+    // Controla la apertura y el cierre del menú de usuario de la interfaz
+    $('#user-toggle').on('click', function () {
+      var sidebar = document.getElementById('sidebar-user');
+      var content = document.getElementById('content-user');
 
-  
- 
+      if (sidebar.style.right === '0px') {
+        sidebar.style.right = '-200px';
+        content.style.marginRight = '0';
+      } else {
+        sidebar.style.right = '0px';
+        content.style.marginRight = '200px';
+      }
+    })
 
-  // Función para cerrar el sidebar si se hace clic fuera de él
-  function cerrarSidebar(event) {
-        var sidebar = document.getElementById('sidebar');
-        var content = document.getElementById('content');
-        var menuToggle = document.getElementById('menu-toggle');
 
-        // Verificar si el clic no está dentro del sidebar ni del botón de menú
-        if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
-            sidebar.style.left = '-200px';
-            content.style.marginLeft = '0';
-        }
+
+
+
+
+    // Función para cerrar el sidebar si se hace clic fuera de él
+    function cerrarSidebar(event) {
+      var sidebar = document.getElementById('sidebar');
+      var content = document.getElementById('content');
+      var menuToggle = document.getElementById('menu-toggle');
+
+      // Verificar si el clic no está dentro del sidebar ni del botón de menú
+      if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+        sidebar.style.left = '-200px';
+        content.style.marginLeft = '0';
+      }
     }
 
     // Evento para cerrar el sidebar al hacer clic fuera de él
     document.addEventListener('click', cerrarSidebar);
 
 
-     // Función para cerrar el sidebar de usuario si se hace clic fuera de él
- function cerrarSidebaruser(event) {
-        var sidebar = document.getElementById('sidebar-user');
-        var userToggle = document.getElementById('user-toggle');
+    // Función para cerrar el sidebar de usuario si se hace clic fuera de él
+    function cerrarSidebaruser(event) {
+      var sidebar = document.getElementById('sidebar-user');
+      var userToggle = document.getElementById('user-toggle');
 
-        // Verificar si el clic no está dentro del sidebar de usuario  ni del botón de menú
-        if (!sidebar.contains(event.target) && !userToggle.contains(event.target)) {
-            sidebar.style.right = '-200px';
-        }
+      // Verificar si el clic no está dentro del sidebar de usuario  ni del botón de menú
+      if (!sidebar.contains(event.target) && !userToggle.contains(event.target)) {
+        sidebar.style.right = '-200px';
+      }
     }
 
     // Evento para cerrar el sidebar al hacer clic fuera de él
     document.addEventListener('click', cerrarSidebaruser);
 
 
-    async function infoUserModal(){
-    const form = document.getElementById('formInfoUser');
-      let infoUser= await api.get(`/users/${localStorage.getItem("id")}`);
+    async function infoUserModal() {
+      const form = document.getElementById('formInfoUser');
+      let infoUser = await api.get(`/users/${localStorage.getItem("id")}`);
       console.log(infoUser);
-      form.nombre.value=infoUser.data.name;
-      form.email.value=infoUser.data.email;
-      form.level.value=infoUser.data.level;
-    openModal('infoUser');
+      form.nombre.value = infoUser.data.name;
+      form.email.value = infoUser.data.email;
+      form.level.value = infoUser.data.level;
+      openModal('infoUser');
     }
 
 
-    async function passUserModal(){
-    const form = document.getElementById('formPassUser');
+    async function passUserModal() {
+      const form = document.getElementById('formPassUser');
 
 
-    openModal('passUser');
+      openModal('passUser');
     }
 
 
-    function logOut(){
+    function logOut() {
       api.post(`/logout`)
-            
-            .then(data=>{
-                localStorage.removeItem("token");
-                localStorage.removeItem("level");
-                localStorage.removeItem("name");
-                location.href="index.html";
-                
-            })
-            .catch(error => {
-              
-            })
+
+        .then(data => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("level");
+          localStorage.removeItem("name");
+          location.href = "index.html";
+
+        })
+        .catch(error => {
+
+        })
 
     }
-  
 
 
 
-// Función para abrir el modal de notificaciones
-function openNotificationModal(message) {
-  var modal = document.getElementById('notificationModal');
-  //var notificationMessage = document.getElementById('notificationMessage');
-  //notificationMessage.innerText = message;
-  modal.style.display = 'block';
-  api.get(`/alerta`)
-  .then(reply=>{
-      reply.data.forEach(element => {
-        console.log(element);
-        if(element.vehicle_log){
-          element.vehicle_log.velocidad
-        }
-      });
-  })
+
+    // Función para abrir el modal de notificaciones
+    function openNotificationModal(message) {
+      var modal = document.getElementById('notificationModal');
+      //var notificationMessage = document.getElementById('notificationMessage');
+      //notificationMessage.innerText = message;
+      modal.style.display = 'block';
+      api.get(`/alerta`)
+        .then(reply => {
+          reply.data.forEach(element => {
+            console.log(element);
+            if (element.vehicle_log) {
+              element.vehicle_log.velocidad
+            }
+          });
+        })
 
 
-  // Ejemplo de uso del modal de notificaciones
+      // Ejemplo de uso del modal de notificaciones
 
-}
+    }
 
-// Función para cerrar el modal de notificaciones
-function closeNotificationModal() {
-  var modal = document.getElementById('notificationModal');
-  modal.style.display = 'none';
-}
+    // Función para cerrar el modal de notificaciones
+    function closeNotificationModal() {
+      var modal = document.getElementById('notificationModal');
+      modal.style.display = 'none';
+    }
 
-</script>
-<script>
-  const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
-</script>
+  </script>
+  <script>
+    const baseUrl = "https://control-jornada.wit.la/backend-control-jornada/public/api/";
+  </script>
 
 </html>

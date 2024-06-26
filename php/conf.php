@@ -1,7 +1,7 @@
 <?php
 
 
-$mailpass = "Wit2023#";
+$mailpass = "qzyuwykitiekjsku";
 
 
 ?>

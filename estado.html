@@ -10,7 +10,7 @@
         <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atrás </i>
     </div>
     <div class="panelCentralTable">
-        <button class="btnCrear" id="reloadTableBtn">Recargar Tabla</button>
+        <button class="btnCrear" onclick="actualizarTabla()">Recargar Tabla</button>
         <div>
             <button onclick="exportarCSVNoti()" class="btnsub"> <i class="fa fa-file-text-o"></i> csv</button>
             <button onclick="excelNoti()" class="btnsub"><i class="fa fa-file-excel-o"></i> Excel</button>
@@ -42,53 +42,77 @@
     $(document).ready(function () {
         const api = getApi();
         const baseUrl = api.baseUrl;
-        // Primero, obtenemos los datos de logs
-        $.ajax({
-            url: baseUrl + "logs",
-            beforeSend: function (xhr) {
-                var token = localStorage.getItem("token");
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            },
-            success: function (logsData) {
-                // Después, obtenemos los datos de última conexión
-                $.ajax({
-                    url: baseUrl + "wsbuses",
-                    beforeSend: function (xhr) {
-                        var token = localStorage.getItem("token");
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                    },
-                    success: function (wsBusesData) {
-                        // Combinamos los datos de ambas fuentes
-                        var combinedData = logsData.map(function (log) {
-                            var bus = wsBusesData.find(function (bus) {
-                                return bus.patente === log.vehicle.patente;
-                            });
-                            log.ultima_conexion = bus ? bus['ultima-conexion'] : 'N/A';
-                            return log;
-                        });
 
-                        // Inicializamos la tabla DataTable con los datos combinados
-                        $('#tableEstado').DataTable({
-                            data: combinedData,
-                            columns: [
-                                { data: 'vehicle_id' },
-                                { data: 'vehicle.patente' },
-                                { data: 'estado' },
-                                { data: 'velocidad' },
-                                { data: 'ultima_conexion' }
-                            ],
-                            language: {
-                                //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+        function cargarDatos() {
+            $("#loadingscreen").show();
+            // Primero, obtenemos los datos de logs
+            $.ajax({
+                url: baseUrl + "logs",
+                beforeSend: function (xhr) {
+                    var token = localStorage.getItem("token");
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                },
+                success: function (logsData) {
+                    // Después, obtenemos los datos de última conexión
+                    $.ajax({
+                        url: baseUrl + "wsbuses",
+                        beforeSend: function (xhr) {
+                            var token = localStorage.getItem("token");
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                        },
+                        success: function (wsBusesData) {
+                            // Combinamos los datos de ambas fuentes
+                            var combinedData = logsData.map(function (log) {
+                                var bus = wsBusesData.find(function (bus) {
+                                    return bus.patente === log.vehicle.patente;
+                                });
+                                log.ultima_conexion = bus ? bus['ultima-conexion'] : 'N/A';
+                                return log;
+                            });
+
+                            // Inicializamos o actualizamos la tabla DataTable con los datos combinados
+                            if ($.fn.DataTable.isDataTable('#tableEstado')) {
+                                var table = $('#tableEstado').DataTable();
+                                table.clear().rows.add(combinedData).draw();
+                            } else {
+                                $('#tableEstado').DataTable({
+                                    data: combinedData,
+                                    columns: [
+                                        { data: 'vehicle_id' },
+                                        { data: 'vehicle.patente' },
+                                        { data: 'estado' },
+                                        { data: 'velocidad' },
+                                        { data: 'ultima_conexion' }
+                                    ],
+                                    language: {
+                                        //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+                                    }
+                                });
                             }
-                        });
-                    }
-                });
-            }
-        });
-        $("#reloadTableBtn").click(function () {
-            location.reload();
-        });
+                            $("#loadingscreen").hide();
+                        },
+                        error: function () {
+                            $("#loadingscreen").hide();
+                            alert('Error al obtener los datos de wsBuses');
+                        }
+                    });
+                },
+                error: function () {
+                    $("#loadingscreen").hide();
+                    alert('Error al obtener los datos de logs');
+                }
+            });
+        }
+
+        cargarDatos();
+
+        // Función para actualizar la tabla
+        function actualizarTabla() {
+            cargarDatos();
+        }
     });
+
+
 
     // función para exportar CSV
     function exportarCSVNoti() {
