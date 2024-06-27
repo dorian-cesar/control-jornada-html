@@ -280,6 +280,15 @@ table tr td {
   text-align: center !important;
 }
 
+#btnCrear{
+  margin-left: 1600px;
+  float: right;
+}
+
+.frame{
+  margin-top: -40px;
+}
+
 .btnCrear {
   width: 120px;
   border: 0px solid var(--text-color);

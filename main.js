@@ -110,6 +110,10 @@ function mapa(){
   document.getElementById('pageMapa').style.display = 'block';
 }
 //funciones de menu usuario 
+function analitica(){
+  blankPage();// Oculta todas las páginas
+  document.getElementById('pageAnalitica').style.display = 'block';
+}
 
 function mapaInteractivo(){
   blankPage();// Oculta todas las páginas

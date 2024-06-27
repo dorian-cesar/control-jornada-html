@@ -1,19 +1,18 @@
 <div id="pageNotificaciones">
     <div style="text-align: center;">
-        <h1>Notificaciones <i class="fa fa-bell"></i></h1>
+        <h1>Exceso de Velocidad <i class="fa fa-tachometer"></i></h1>
     </div>
     <div class="redir margin-left: 30px">
         <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atrás </i>
     </div>
 
     <div class="panelCentralTable">
-        <button class="btnCrear" id="reloadTableBtn">Recargar Tabla</button>
+        <button class="btnCrear" onclick="actualizarTablaNot()">Actualizar</button>
         <div>
             <button onclick="exportarCSVNoti()" class="btnsub"> <i class="fa fa-file-text-o"></i> csv</button>
             <button onclick="excelNoti()" class="btnsub"><i class="fa fa-file-excel-o"></i> Excel</button>
             <button onclick="imprimirTablaNoti()" class="btnsub"><i class="fa fa-print"></i> Imprimir</button>
             <button onclick="copiarNoti()" class="btnsub"><i class="fa fa-files-o"></i> Copiar</button>
-
         </div>
 
         <table id="tablanoti">
@@ -31,66 +30,65 @@
             </tbody>
         </table>
     </div>
-
 </div>
 
 
 <script>
     $(document).ready(function () {
-    // Configuración de la API y métodos necesarios
-    const api = {
-        baseUrl: 'https://control-jornada.wit.la/backend-control-jornada/public/api/',
-        // Asumiendo que la función getApi() devuelve el objeto con el método get para hacer solicitudes HTTP
-        get: axios.get
-    };
+        // Configuración de la API y métodos necesarios
+        const api = {
+            baseUrl: 'https://control-jornada.wit.la/backend-control-jornada/public/api/',
+            // Asumiendo que la función getApi() devuelve el objeto con el método get para hacer solicitudes HTTP
+            get: axios.get
+        };
 
-    // Función para cargar la tabla de notificaciones
-    function loadNotificationTable() {
-        tablenoti.ajax.reload(function () {
-        });
-    }
-
-    // Inicialización de DataTable y configuración de la tabla de notificaciones
-    let tablenoti = $("#tablanoti").DataTable({
-        "ajax": {
-            "url": api.baseUrl + "gpsalert", // URL para obtener los datos de las alertas GPS
-            "dataSrc": "", // Especifica que los datos devueltos son directamente el array de objetos
-            "beforeSend": function (xhr) { // Función que se ejecuta antes de enviar la solicitud AJAX
-                var token = localStorage.getItem("token"); // Obtener el token de localStorage
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token); // Agregar el token al encabezado de la solicitud
-            }
-        },
-        "columns": [ // Definición de las columnas y los datos que deben mostrar
-            { "data": "id_tracker" }, // Columna para el ID de la alerta
-            { "data": "fecha" }, // Columna para la fecha de la alerta
-            { "data": "patente" }, // Columna para la patente del vehículo
-            { "data": "conductor" }, // Columna para el nombre del conductor
-            { "data": "speed" }, // Columna para la velocidad registrada
-            { // Columna para las coordenadas de ubicación
-                "data": "location",
-                "render": function (data, type, row) {
-                    return `[${data.lat}, ${data.lng}]`; // Formato simple de las coordenadas
-                }
-            }
-        ],
-        "order": [[0, "desc"]], // Ordena la primera columna (ID) de manera descendente por defecto
-        "language": {
-            // "url": "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+        // Función para cargar la tabla de notificaciones
+        function loadNotificationTable() {
+            tablenoti.ajax.reload(function () {
+            });
         }
-    });
 
-    // Evento que se ejecuta después de que la tabla se haya cargado por completo
-    tablenoti.on('draw', function () {
-        $("#loadingscreen").hide(); // Ocultar pantalla de carga después de cargar la tabla
-    });
+        // Inicialización de DataTable y configuración de la tabla de notificaciones
+        let tablenoti = $("#tablanoti").DataTable({
+            "ajax": {
+                "url": api.baseUrl + "gpsalert", // URL para obtener los datos de las alertas GPS
+                "dataSrc": "", // Especifica que los datos devueltos son directamente el array de objetos
+                "beforeSend": function (xhr) { // Función que se ejecuta antes de enviar la solicitud AJAX
+                    var token = localStorage.getItem("token"); // Obtener el token de localStorage
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token); // Agregar el token al encabezado de la solicitud
+                }
+            },
+            "columns": [ // Definición de las columnas y los datos que deben mostrar
+                { "data": "id_tracker" }, // Columna para el ID de la alerta
+                { "data": "fecha" }, // Columna para la fecha de la alerta
+                { "data": "patente" }, // Columna para la patente del vehículo
+                { "data": "conductor" }, // Columna para el nombre del conductor
+                { "data": "speed" }, // Columna para la velocidad registrada
+                { // Columna para las coordenadas de ubicación
+                    "data": "location",
+                    "render": function (data, type, row) {
+                        return `[${data.lat}, ${data.lng}]`; // Formato simple de las coordenadas
+                    }
+                }
+            ],
+            "order": [[0, "desc"]], // Ordena la primera columna (ID) de manera descendente por defecto
+            "language": {
+                // "url": "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+            }
+        });
 
-    // Funciones para botones
+        // Evento que se ejecuta después de que la tabla se haya cargado por completo
+        tablenoti.on('draw', function () {
+            $("#loadingscreen").hide(); // Ocultar pantalla de carga después de cargar la tabla
+        });
 
-    // Agregar evento de clic al botón de recargar tabla
-    $("#reloadTableBtn").click(function () {
-        loadNotificationTable(); // Llama a la función para recargar la tabla
+        // Funciones para botones
+
+        // Agregar evento de clic al botón de recargar tabla
+        $("#reloadTableBtn").click(function () {
+            loadNotificationTable(); // Llama a la función para recargar la tabla
+        });
     });
-});
 
 
 
@@ -227,5 +225,12 @@
         seleccion.addRange(rango);
         document.execCommand("copy");
         seleccion.removeAllRanges();
+    }
+
+    function actualizarTablaNot() {
+        $("#loadingscreen").show();
+        tableHistAct.ajax.reload(function () {
+            $("#loadingscreen").hide();
+        }, false);
     }
 </script>

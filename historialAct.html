@@ -40,6 +40,7 @@
             <button onclick="excelHAct()" class="btnsub">Excel</button>
             <button onclick="imprimirTablaHAct()" class="btnsub">Imprimir</button>
             <button onclick="copiarHAct()" class="btnsub">Copiar</button>
+            <button class="btnCrear" onclick="actualizarTabla2()">Actualizar</button>
         </div>
         <table id="tableHistorialAct" style="width: 100%; margin-top: 20px;">
             <thead>
@@ -77,7 +78,7 @@
                 },
                 "columns": [
                     { "data": "id" },
-                    { "data": "conductor"},
+                    { "data": "conductor" },
                     { "data": "rut" },
                     { "data": "patente" },
                     {
@@ -116,7 +117,7 @@
             // Validar que la fecha "Desde" no sea mayor que la fecha "Hasta"
             if (dateDesde && dateHasta && dateDesde > dateHasta) {
                 alert("La fecha 'Desde' no puede ser mayor que la fecha 'Hasta'.");
-                return; 
+                return;
             }
 
             // Filtrar los datos de la tabla
@@ -272,6 +273,13 @@
             seleccion.addRange(rango);
             document.execCommand("copy");
             seleccion.removeAllRanges();
+        }
+
+        function actualizarTabla2() {
+            $("#loadingscreen").show();
+            tableHistAct .ajax.reload(function () {
+                $("#loadingscreen").hide();
+            }, false);
         }
     </script>
 </div>

@@ -282,26 +282,27 @@
     });
 
     function validarEditar() {
-        var patente = formEditVe.patente.value;
-        var tipo = formEditVe.tipo.value;
-        var track_id = formEditVe.track_id.value;
+    var patente = formEditVe.patente.value;
+    var tipo = formEditVe.tipo.value;
+    var track_id = formEditVe.track_id.value;
 
-        // Validación de patente
-        var patenteRegex = /^[a-zA-Z]{4}\d{2}$/;
-        if (!patenteRegex.test(patente)) {
-            alert("Formato de patente inválido. Debe ser XXXXNN");
-            return false;
-        }
-
-        // Validación de campos obligatorios
-        if (patente === "" || tipo === "" || track_id === "") {
-            alert("Todos los campos son obligatorios");
-            return false;
-        }
-
-        // Si la validación pasa, se puede enviar el formulario
-        return true;
+    // Validación de patente
+    var patenteRegex = /^[a-zA-Z]{4}-\d{2}$/;
+    if (!patenteRegex.test(patente)) {
+        alert("Formato de patente inválido. Debe ser XXXX-45");
+        return false;
     }
+
+    // Validación de campos obligatorios
+    if (patente === "" || tipo === "" || track_id === "") {
+        alert("Todos los campos son obligatorios");
+        return false;
+    }
+
+    // Si la validación pasa, se puede enviar el formulario
+    return true;
+}
+
 
     //poblar tablas desde api
     $(document).ready(function () {
@@ -367,9 +368,9 @@
         var tipo = formCV.tipo.value;
 
         // Validación de patente
-        var patenteRegex = /^[a-zA-Z]{4}\d{2}$/;
+        var patenteRegex = /^[a-zA-Z]{4}-\d{2}$/;
         if (!patenteRegex.test(patente)) {
-            alert("Formato de patente inválido. Debe ser XXXX-NN");
+            alert("Formato de patente inválido. Debe ser XXXX-45");
             return false;
         }
 
@@ -382,6 +383,7 @@
         // Si la validación pasa, se puede enviar el formulario
         return true;
     }
+
 
     function validarCrearTipo() {
         var tipo = formTipo.tipo.value;
