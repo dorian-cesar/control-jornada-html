@@ -2,8 +2,6 @@
     .column-id-tracker {
     height:  30px !important;
 }
-
-
 </style>
 <div id="pageNotificaciones">
     <div style="text-align: center;">
@@ -30,6 +28,8 @@
                     <th>Patente</th>
                     <th>Conductor</th>
                     <th>Velocidad</th>
+                    <th>Hora de Inicio</th>
+                    <th>Duración</th>
                     <th>Coordenadas</th>
                 </tr>
             </thead>
@@ -62,7 +62,9 @@
             { "data": "fecha", className: "column-fecha" }, // Columna para la fecha de la alerta
             { "data": "patente", className: "column-patente" }, // Columna para la patente del vehículo
             { "data": "conductor", className: "column-conductor" }, // Columna para el nombre del conductor
-            { "data": "speed", className: "column-speed" }, // Columna para la velocidad registrada
+            { "data": "speed", className: "column-speed" },
+            { "data": "start_time" },
+            { "data": "duration" }, // Columna para la velocidad registrada
             { // Columna para las coordenadas de ubicación
                 "data": "location",
                 "className": "column-location",
