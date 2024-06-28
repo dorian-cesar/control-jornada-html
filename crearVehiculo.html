@@ -8,7 +8,8 @@
     <div class="panelCentralTable">
         <!--<button class="btnCrear" onclick="modalCrearVehiculo()">Crear Vehiculo</button>-->
         <button class="btnCrear" onclick="modalCrearTipo()">Crear Tipo</button>
-        <button class="btnCrear" onclick="sincronizar()">Sincronizar</button>
+        <button class="btnCrear" onclick="actualizarTablaVehiculo()">Actualizar</button>
+        <button class="btnCrear" id="Btnvehiculo" onclick="sincronizar()" style="margin-left: 800px;">Sincronizar</button>
 
         <table id="tableVehiculo" style="width: 1280px;">
             <thead>
@@ -360,7 +361,12 @@
         });
     });
 
-
+    function actualizarTablaVehiculo() {
+            $("#loadingscreen").show();
+            tableVe.ajax.reload(function () {
+                $("#loadingscreen").hide();
+            }, false);
+        }
 
     function validarFormularioCrearVehiculo() {
         var patente = formCV.patente.value;
