@@ -7,6 +7,7 @@
     </div>
     <div class="panelCentralTable">
         <button class="btnCrear" onclick="modalCrearTarjeta()">Crear Tarjeta</button>
+        <button class="btnCrear" onclick="actualizarTablaTarjeta()">Actualizar</button>
 
 
         <div>
@@ -335,6 +336,12 @@
         });
     });
 
+    function actualizarTablaTarjeta() {
+        $("#loadingscreen").show();
+        tableTar.ajax.reload(function () {
+            $("#loadingscreen").hide();
+        }, false);
+    }
 
 
     //funciones para Botones 
