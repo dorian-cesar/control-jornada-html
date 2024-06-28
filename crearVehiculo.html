@@ -1,3 +1,19 @@
+
+<style>
+    .dataTables_filter input[type="search"] {
+        height:40px; /* Ajusta este valor según tus necesidades */
+    }
+
+    .botones-container {
+        display: flex;
+        justify-content: flex-start; /* Alinea los botones con espacio entre ellos */
+        margin-bottom: 10px; /* Espacio opcional entre los botones y la tabla */
+    }
+
+    #Btnvehiculo{
+        margin-left: 500px;
+    }
+</style>
 <div id="pageVehiculos">
     <div style="text-align: center ;">
         <h1>Gestión de Vehiculos</h1>
@@ -7,9 +23,11 @@
     </div>
     <div class="panelCentralTable">
         <!--<button class="btnCrear" onclick="modalCrearVehiculo()">Crear Vehiculo</button>-->
-        <button class="btnCrear" onclick="modalCrearTipo()">Crear Tipo</button>
-        <button class="btnCrear" onclick="actualizarTablaVehiculo()">Actualizar</button>
-        <button class="btnCrear" id="Btnvehiculo" onclick="sincronizar()" style="margin-left: 800px;">Sincronizar</button>
+        <div class="botones-container">
+            <button class="btnCrear" onclick="modalCrearTipo()">Crear Tipo</button>
+            <button class="btnCrear" onclick="actualizarTablaVehiculo()">Actualizar</button>
+            <button class="btnCrear" id="Btnvehiculo" onclick="sincronizar()">Sincronizar</button>
+        </div>
 
         <table id="tableVehiculo" style="width: 1280px;">
             <thead>
@@ -347,16 +365,38 @@
                 {
                     "data": "id",
                     "render": function (data, type, row) {
-                        return `
-                        <button class='fa fa-pencil btnAccion' onclick='modalEditVe(${row.id},"${row.patente}")'></button>
-                        <button class='fa fa-trash btnAccion' onclick='eliminarVehiculo(${row.id},"${row.patente}")'></button>
-                    `;
+                        return `<button class='fa fa-pencil btnAccion' onclick='modalEditVe(${row.id},"${row.patente}")'></button>
+                                <button class='fa fa-trash btnAccion' onclick='eliminarVehiculo(${row.id},"${row.patente}")'></button>`;
                     }
                 }
             ],
             "language": {
-                //"url": "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
-            }
+                "sLengthMenu": "Mostrar _MENU_ registros",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "sSearch": "Buscar:", // Custom search label
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior",
+                },
+                "sEmptyTable": "Ningún dato disponible en esta tabla",
+                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                "sLoadingRecords": "Cargando...",
+                "sProcessing": "Procesando...",
+                "sZeroRecords": "No se encontraron resultados",
+                "sInfoPostFix": ""
+            },
+            "columnDefs": [
+                { "orderable": false, "targets": "no-sort" }
+            ],
+        });
+
+        // Ajustar el tamaño del input de búsqueda después de inicializar la tabla
+        $('.dataTables_filter input[type="search"]').css({
+            'height': '40px',  // Puedes ajustar este valor según lo necesites
+            'display': 'inline-block'
         });
     });
 
@@ -456,3 +496,4 @@
     }
 
 </script>
+
