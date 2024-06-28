@@ -281,7 +281,7 @@ table tr td {
 }
 
 #btnCrear{
-  margin-left: 1600px;
+  margin-left: 1700px;
   float: right;
 }
 
@@ -696,6 +696,7 @@ color: var(--text-color);
   text-align: left;
   color: var(--text-color);
   cursor: pointer;
+  font-size: 25px;
 }
 
 /* Estilos para el modal de notificaciones */
