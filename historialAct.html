@@ -16,6 +16,12 @@
         margin: 0 5px;
         padding: 5px;
     }
+    .column-id {
+    height: 30px !important;
+}
+
+
+
 </style>
 
 <div id="pageHistorialActividades">
@@ -64,47 +70,48 @@
         let tableHistAct;
 
         $(document).ready(function () {
-            const api = getApi();
-            const baseUrl = api.baseUrl;
+    const api = getApi();
+    const baseUrl = api.baseUrl;
 
-            tableHistAct = $("#tableHistorialAct").DataTable({
-                "ajax": {
-                    "url": "https://control-jornada.wit.la/backend-control-jornada/public/api/registros",
-                    "dataSrc": "",
-                    "beforeSend": function (xhr) {
-                        var token = localStorage.getItem("token");
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                    }
-                },
-                "columns": [
-                    { "data": "id" },
-                    { "data": "conductor" },
-                    { "data": "rut" },
-                    { "data": "patente" },
-                    {
-                        "data": "created_at",
-                        "render": function (data) {
-                            const fechaHora = new Date(data);
-                            const fecha = fechaHora.toLocaleDateString();
-                            return fecha;
-                        }
-                    },
-                    {
-                        "data": "created_at",
-                        "render": function (data) {
-                            const fechaHora = new Date(data);
-                            const hora = fechaHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            return hora;
-                        }
-                    },
-                    { "data": "tipo" },
-                    { "data": "metodo" },
-                ],
-                "language": {
-                    //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+    tableHistAct = $("#tableHistorialAct").DataTable({
+        "ajax": {
+            "url": "https://control-jornada.wit.la/backend-control-jornada/public/api/registros",
+            "dataSrc": "",
+            "beforeSend": function (xhr) {
+                var token = localStorage.getItem("token");
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        },
+        "columns": [
+            { "data": "id", "className": "column-id" },
+            { "data": "conductor", "className": "column-conductor" },
+            { "data": "rut" },
+            { "data": "patente" },
+            {
+                "data": "created_at",
+                "render": function (data) {
+                    const fechaHora = new Date(data);
+                    const fecha = fechaHora.toLocaleDateString();
+                    return fecha;
                 }
-            });
-        });
+            },
+            {
+                "data": "created_at",
+                "render": function (data) {
+                    const fechaHora = new Date(data);
+                    const hora = fechaHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    return hora;
+                }
+            },
+            { "data": "tipo" },
+            { "data": "metodo" },
+        ],
+        "language": {
+            //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+        }
+    });
+});
+
 
         function filtrarPorFechas() {
             const fechaDesdeInput = document.getElementById("fecha-desde").value;

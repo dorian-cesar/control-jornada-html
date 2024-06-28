@@ -1,6 +1,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+<style>
+    .column-id {
+    height:  30px !important;
+}
 
+</style>
 
 <div id="pageEstado">
     <div style="text-align: center;">
@@ -40,86 +45,87 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.17/jspdf.plugin.autotable.min.js"></script>
 <script>
    $(document).ready(function () {
-            const api = getApi();
-            const baseUrl = api.baseUrl;
+    const api = getApi();
+    const baseUrl = api.baseUrl;
 
-            function cargarDatos(callback) {
-                $("#loadingscreen").show();
-                // Primero, obtenemos los datos de logs
+    function cargarDatos(callback) {
+        $("#loadingscreen").show();
+        // Primero, obtenemos los datos de logs
+        $.ajax({
+            url: baseUrl + "logs",
+            beforeSend: function (xhr) {
+                var token = localStorage.getItem("token");
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            },
+            success: function (logsData) {
+                // Después, obtenemos los datos de última conexión
                 $.ajax({
-                    url: baseUrl + "logs",
+                    url: baseUrl + "wsbuses",
                     beforeSend: function (xhr) {
                         var token = localStorage.getItem("token");
                         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
                     },
-                    success: function (logsData) {
-                        // Después, obtenemos los datos de última conexión
-                        $.ajax({
-                            url: baseUrl + "wsbuses",
-                            beforeSend: function (xhr) {
-                                var token = localStorage.getItem("token");
-                                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                            },
-                            success: function (wsBusesData) {
-                                // Combinamos los datos de ambas fuentes
-                                var combinedData = logsData.map(function (log) {
-                                    var bus = wsBusesData.find(function (bus) {
-                                        return bus.patente === log.vehicle.patente;
-                                    });
-                                    log.ultima_conexion = bus ? bus['ultima-conexion'] : 'N/A';
-                                    return log;
-                                });
-
-                                // Inicializamos o actualizamos la tabla DataTable con los datos combinados
-                                if ($.fn.DataTable.isDataTable('#tableEstado')) {
-                                    var table = $('#tableEstado').DataTable();
-                                    table.clear().rows.add(combinedData).draw();
-                                } else {
-                                    $('#tableEstado').DataTable({
-                                        data: combinedData,
-                                        columns: [
-                                            { data: 'vehicle_id' },
-                                            { data: 'vehicle.patente' },
-                                            { data: 'estado' },
-                                            { data: 'velocidad' },
-                                            { data: 'ultima_conexion' }
-                                        ],
-                                        language: {
-                                            //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
-                                        }
-                                    });
-                                }
-                                $("#loadingscreen").hide();
-                                if (callback) callback();
-                            },
-                            error: function () {
-                                $("#loadingscreen").hide();
-                                alert('Error al obtener los datos de wsBuses');
-                            }
+                    success: function (wsBusesData) {
+                        // Combinamos los datos de ambas fuentes
+                        var combinedData = logsData.map(function (log) {
+                            var bus = wsBusesData.find(function (bus) {
+                                return bus.patente === log.vehicle.patente;
+                            });
+                            log.ultima_conexion = bus ? bus['ultima-conexion'] : 'N/A';
+                            return log;
                         });
+
+                        // Inicializamos o actualizamos la tabla DataTable con los datos combinados
+                        if ($.fn.DataTable.isDataTable('#tableEstado')) {
+                            var table = $('#tableEstado').DataTable();
+                            table.clear().rows.add(combinedData).draw();
+                        } else {
+                            $('#tableEstado').DataTable({
+                                data: combinedData,
+                                columns: [
+                                    { data: "vehicle_id", className: "column-id" },
+                                    { data: 'vehicle.patente', className: "column-patente" },
+                                    { data: 'estado', className: "column-estado" },
+                                    { data: 'velocidad', className: "column-velocidad" },
+                                    { data: 'ultima_conexion', className: "column-ultima-conexion" }
+                                ],
+                                language: {
+                                    //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+                                }
+                            });
+                        }
+                        $("#loadingscreen").hide();
+                        if (callback) callback();
                     },
                     error: function () {
                         $("#loadingscreen").hide();
-                        alert('Error al obtener los datos de logs');
+                        alert('Error al obtener los datos de wsBuses');
                     }
                 });
+            },
+            error: function () {
+                $("#loadingscreen").hide();
+                alert('Error al obtener los datos de logs');
             }
-
-            function actualizarTablaConexion() {
-                $("#loadingscreen").show();
-                cargarDatos(function () {
-                    $("#loadingscreen").hide();
-                });
-            }
-
-            // Llamar a cargarDatos inicialmente
-            cargarDatos();
-
-            // Asignar evento de clic al botón de actualizar
-            $("#refreshButton").click(function () {
-                actualizarTablaConexion();
-            });
         });
+    }
+
+    function actualizarTablaConexion() {
+        $("#loadingscreen").show();
+        cargarDatos(function () {
+            $("#loadingscreen").hide();
+        });
+    }
+
+    // Llamar a cargarDatos inicialmente
+    cargarDatos();
+
+    // Asignar evento de clic al botón de actualizar
+    $("#refreshButton").click(function () {
+        actualizarTablaConexion();
+    });
+});
+
 
 
     // función para exportar CSV
