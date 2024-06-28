@@ -33,7 +33,7 @@
                     <th>Nombre</th>
                     <th>Tarjeta</th>
                     <th>Empresa</th>
-                    <th>Vehiculo</th>
+                    <!--<th>Vehiculo</th>--->
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -383,12 +383,12 @@
                         return data !== null ? data : 'sin empresa';
                     }
                 },
-                {
+                /*{
                     "data": "vehicle",
                     "render": function (data, type, full, meta) {
                         return `<button class="btnpatente" onclick='modalEditVehiculo(${full.id})'>${data ? data.patente : 'sin patente'}</button>`;
                     }
-                },
+                },*/
                 {
                     "data": "id",
                     "render": function (data, type, row) {
