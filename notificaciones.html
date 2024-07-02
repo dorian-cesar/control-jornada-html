@@ -25,8 +25,8 @@
                 <tr>
                     <th>ID Tracker</th>
                     <th>Fecha</th>
-                    <th>Patente</th>
-                    <!--<th>Conductor</th>-->
+                    <th>Conductor</th>
+                    <th>Patente</th> 
                     <th>Velocidad</th>
                     <th>Hora de Inicio</th>
                     <th>Duración</th>
@@ -50,7 +50,7 @@
     // Inicialización de DataTable y configuración de la tabla de notificaciones
     let tablenoti = $("#tablanoti").DataTable({
         "ajax": {
-            "url": api.baseUrl + "gpsalert", // URL para obtener los datos de las alertas GPS
+            "url": api.baseUrl + "eventos", // URL para obtener los datos de las alertas GPS
             "dataSrc": "", // Especifica que los datos devueltos son directamente el array de objetos
             "beforeSend": function (xhr) { // Función que se ejecuta antes de enviar la solicitud AJAX
                 var token = localStorage.getItem("token"); // Obtener el token de localStorage
@@ -59,11 +59,11 @@
         },
         "columns": [ // Definición de las columnas y los datos que deben mostrar
             { "data": "id_tracker", className: "column-id-tracker" }, // Columna para el ID de la alerta
-            { "data": "fecha", className: "column-fecha" }, // Columna para la fecha de la alerta
+            { "data": "fecha", className: "column-fecha" }, 
+            { "data": "conductor"}, // Columna para la fecha de la alerta
             { "data": "patente", className: "column-patente" }, // Columna para la patente del vehículo
-            // { "data": "conductor", className: "column-conductor" }, // Columna para el nombre del conductor
-            { "data": "speed", className: "column-speed" },
-            { "data": "start_time" },
+            { "data": "velocidad", className: "column-speed" },
+            { "data": "time_evento" },
             { "data": "duration" }, // Columna para la velocidad registrada
             { // Columna para las coordenadas de ubicación
                 "data": "location",
@@ -75,7 +75,22 @@
         ],
         "order": [[0, "desc"]], // Ordena la primera columna (ID) de manera descendente por defecto
         "language": {
-            // "url": "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sSearch": "Buscar:",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "sEmptyTable": "Ningún dato disponible en esta tabla",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sLoadingRecords": "Cargando...",
+            "sProcessing": "Procesando...",
+            "sZeroRecords": "No se encontraron resultados",
+            "sInfoPostFix": ""
         }
     });
 
@@ -102,6 +117,10 @@
         loadNotificationTable(); // Llama a la función para recargar la tabla
     });
 });
+
+
+
+
 
 
 
