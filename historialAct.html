@@ -16,12 +16,10 @@
         margin: 0 5px;
         padding: 5px;
     }
+
     .column-id {
-    height: 30px !important;
-}
-
-
-
+        height: 30px !important;
+    }
 </style>
 
 <div id="pageHistorialActividades">
@@ -70,56 +68,59 @@
         let tableHistAct;
 
         $(document).ready(function () {
-    const api = getApi();
-    const baseUrl = api.baseUrl;
+            const api = getApi();
+            const baseUrl = api.baseUrl;
 
-    tableHistAct = $("#tableHistorialAct").DataTable({
-        "ajax": {
-            "url": "https://control-jornada.wit.la/backend-control-jornada/public/api/registros",
-            "dataSrc": "",
-            "beforeSend": function (xhr) {
-                var token = localStorage.getItem("token");
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            }
-        },
-        "columns": [
-            { "data": "id", "className": "column-id" },
-            { "data": "conductor", "className": "column-conductor" },
-            { "data": "rut" },
-            { "data": "patente" },
-            {
-                "data": "created_at",
-                "render": function (data) {
-                    const fechaHora = new Date(data);
-                    const fecha = fechaHora.toLocaleDateString();
-                    return fecha;
+            tableHistAct = $("#tableHistorialAct").DataTable({
+                "ajax": {
+                    "url": "https://control-jornada.wit.la/backend-control-jornada/public/api/registros",
+                    "dataSrc": "",
+                    "beforeSend": function (xhr) {
+                        var token = localStorage.getItem("token");
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    }
+                },
+                "columns": [
+                    { "data": "id", "className": "column-id" },
+                    { "data": "conductor", "className": "column-conductor" },
+                    { "data": "rut" },
+                    { "data": "patente" },
+                    {
+                        "data": "created_at",
+                        "render": function (data) {
+                            const fechaHora = new Date(data);
+                            const fecha = fechaHora.toLocaleDateString();
+                            return fecha;
+                        }
+                    },
+                    {
+                        "data": "created_at",
+                        "render": function (data) {
+                            const fechaHora = new Date(data);
+                            const hora = fechaHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            return hora;
+                        }
+                    },
+                    { "data": "tipo" },
+                    { "data": "metodo" },
+                ],
+                "language": {
+                    //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
                 }
-            },
-            {
-                "data": "created_at",
-                "render": function (data) {
-                    const fechaHora = new Date(data);
-                    const hora = fechaHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    return hora;
-                }
-            },
-            { "data": "tipo" },
-            { "data": "metodo" },
-        ],
-        "language": {
-            //"url":"//cdn.datatables.net/plug-ins/2.0.3/i18n/es-CL.json"
-        }
-    });
-});
+            });
+        });
 
 
         function filtrarPorFechas() {
             const fechaDesdeInput = document.getElementById("fecha-desde").value;
             const fechaHastaInput = document.getElementById("fecha-hasta").value;
 
-            // Convertir las fechas a objetos Date
+            // Convertir las fechas a objetos Date en el formato correcto
             const dateDesde = fechaDesdeInput ? new Date(fechaDesdeInput) : null;
             const dateHasta = fechaHastaInput ? new Date(fechaHastaInput) : null;
+
+            console.log("Fecha desde:", dateDesde);
+            console.log("Fecha hasta:", dateHasta);
 
             // Validar que la fecha "Desde" no sea mayor que la fecha "Hasta"
             if (dateDesde && dateHasta && dateDesde > dateHasta) {
@@ -127,19 +128,26 @@
                 return;
             }
 
-            // Filtrar los datos de la tabla
-            tableHistAct.rows().every(function () {
-                const fechaRegistro = new Date(this.data().created_at.split('T')[0]); // Tomar solo la fecha de created_at
+            $.fn.dataTable.ext.search.push(
+                function (settings, data, dataIndex) {
+                    const fechaRegistro = new Date(data[4].split('-').reverse().join('-')); // Convertir la fecha de la tabla
 
-                // Verificar si la fecha del registro está dentro del rango seleccionado
-                if ((dateDesde === null || fechaRegistro >= dateDesde) &&
-                    (dateHasta === null || fechaRegistro <= dateHasta)) {
-                    $(this.node()).show(); // Mostrar la fila si cumple con el filtro
-                } else {
-                    $(this.node()).hide(); // Ocultar la fila si no cumple con el filtro
+                    console.log("Fecha registro:", fechaRegistro);
+
+                    if (
+                        (dateDesde === null || fechaRegistro >= dateDesde) &&
+                        (dateHasta === null || fechaRegistro <= dateHasta)
+                    ) {
+                        return true;
+                    }
+                    return false;
                 }
-            });
+            );
+
+            tableHistAct.draw();
+            $.fn.dataTable.ext.search.pop();
         }
+
 
         function exportarCSVHAct() {
             var tabla = document.getElementById("tableHistorialAct");
@@ -284,7 +292,7 @@
 
         function actualizarTabla2() {
             $("#loadingscreen").show();
-            tableHistAct .ajax.reload(function () {
+            tableHistAct.ajax.reload(function () {
                 $("#loadingscreen").hide();
             }, false);
         }
