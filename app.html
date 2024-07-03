@@ -234,8 +234,12 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      panelControl();
-    });
+  // Encuentra el elemento del botón
+  var boton = document.querySelector('.fa-arrow-circle-left');
+  
+  // Simula un clic en el botón
+  boton.click();
+});
     // Se importa la librería axios para manejar peticiones HTTP
     const api = axios.create({
       baseURL: "https://control-jornada.wit.la/backend-control-jornada/public/api",// Se define la URL base de la API
