@@ -57,6 +57,9 @@
       </div>
 
     </div>
+    <div class="redir margin-left: 30px">
+      <i class="fa fa-arrow-circle-left" onclick="panelControl()"></i>
+    </div>
     <!--Sidebar-->
     <div id="sidebar" class="sidebar">
       <!--Panel de control -->
@@ -230,6 +233,9 @@
 
 
   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      panelControl();
+    });
     // Se importa la librería axios para manejar peticiones HTTP
     const api = axios.create({
       baseURL: "https://control-jornada.wit.la/backend-control-jornada/public/api",// Se define la URL base de la API
@@ -502,7 +508,7 @@
       document.getElementById(`${modalId}-overlay`).style.display = 'none';
       document.getElementById(`${modalId}-modal`).style.display = 'none';
     }
-      
+
   </script>
 
 
