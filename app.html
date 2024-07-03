@@ -19,9 +19,10 @@
 </head>
 
 <body>
-
+  
 
   <style>
+    
     .form-group {
       display: flex;
       align-items: center;
@@ -56,9 +57,6 @@
         <img src="img/wit_logo.png" class="logo" alt="Logo">
       </div>
 
-    </div>
-    <div class="redir margin-left: 30px">
-      <i class="fa fa-arrow-circle-left" onclick="panelControl()"></i>
     </div>
     <!--Sidebar-->
     <div id="sidebar" class="sidebar">
@@ -233,13 +231,6 @@
 
 
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-  // Encuentra el elemento del botón
-  var boton = document.querySelector('.fa-arrow-circle-left');
-  
-  // Simula un clic en el botón
-  boton.click();
-});
     // Se importa la librería axios para manejar peticiones HTTP
     const api = axios.create({
       baseURL: "https://control-jornada.wit.la/backend-control-jornada/public/api",// Se define la URL base de la API
@@ -293,6 +284,7 @@
       $('#contenedorPerfilConductor').load('perfilConductor.html');
       $('#contenedorTarjetas').load('Tarjeta.html');
       $('#contenedorHistorial').load('historialAct.html');
+      //$('#contenedorMapaInteractivo').load('mapaInteractivo.html');
       $('#contenedorAnalitica').load('analitica.html');
       $('#contenedorEstadoTiempoReal').load('tiempoReal.html');
       $('#contenedorInformeGeneral').load('informeGeneral.html');
@@ -434,85 +426,84 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-      const togglePassword1 = document.getElementById('togglePassword1');
-      const togglePassword2 = document.getElementById('togglePassword2');
-      const togglePassword3 = document.getElementById('togglePassword3');
-      const password1 = document.querySelector('input[name="pass"]');
-      const newpass1 = document.querySelector('input[name="newpass1"]');
-      const newpass2 = document.querySelector('input[name="newpass2"]');
+  const togglePassword1 = document.getElementById('togglePassword1');
+  const togglePassword2 = document.getElementById('togglePassword2');
+  const togglePassword3 = document.getElementById('togglePassword3');
+  const password1 = document.querySelector('input[name="pass"]');
+  const newpass1 = document.querySelector('input[name="newpass1"]');
+  const newpass2 = document.querySelector('input[name="newpass2"]');
 
-      togglePassword1.addEventListener('click', function () {
-        togglePassword(password1, togglePassword1);
-      });
+  togglePassword1.addEventListener('click', function () {
+    togglePassword(password1, togglePassword1);
+  });
 
-      togglePassword2.addEventListener('click', function () {
-        togglePassword(newpass1, togglePassword2);
-      });
+  togglePassword2.addEventListener('click', function () {
+    togglePassword(newpass1, togglePassword2);
+  });
 
-      togglePassword3.addEventListener('click', function () {
-        togglePassword(newpass2, togglePassword3);
-      });
+  togglePassword3.addEventListener('click', function () {
+    togglePassword(newpass2, togglePassword3);
+  });
 
-      function togglePassword(passwordInput, toggleIcon) {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        toggleIcon.classList.toggle('fa-eye');
-        toggleIcon.classList.toggle('fa-eye-slash');
-      }
+  function togglePassword(passwordInput, toggleIcon) {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    toggleIcon.classList.toggle('fa-eye');
+    toggleIcon.classList.toggle('fa-eye-slash');
+  }
+});
+
+document.getElementById('formPassUser').addEventListener('submit', async function (event) {
+  event.preventDefault();
+
+  const pass = event.target.pass.value;
+  const newpass1 = event.target.newpass1.value;
+  const newpass2 = event.target.newpass2.value;
+
+  if (newpass1 !== newpass2) {
+    alert('Las nuevas contraseñas no coinciden');
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+
+  console.log('Token:', token);
+  console.log('Old Password:', pass);
+  console.log('New Password:', newpass1);
+  console.log('New Password Confirmation:', newpass2);
+
+  try {
+    const response = await fetch('https://control-jornada.wit.la/backend-control-jornada/public/api/password/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        current_password: pass,
+        new_password: newpass1,
+        new_password_confirmation: newpass2
+      })
     });
 
-    document.getElementById('formPassUser').addEventListener('submit', async function (event) {
-      event.preventDefault();
-
-      const pass = event.target.pass.value;
-      const newpass1 = event.target.newpass1.value;
-      const newpass2 = event.target.newpass2.value;
-
-      if (newpass1 !== newpass2) {
-        alert('Las nuevas contraseñas no coinciden');
-        return;
-      }
-
-      const token = localStorage.getItem('token');
-
-      console.log('Token:', token);
-      console.log('Old Password:', pass);
-      console.log('New Password:', newpass1);
-      console.log('New Password Confirmation:', newpass2);
-
-      try {
-        const response = await fetch('https://control-jornada.wit.la/backend-control-jornada/public/api/password/update', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            current_password: pass,
-            new_password: newpass1,
-            new_password_confirmation: newpass2
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('Error en la solicitud');
-        }
-
-        const result = await response.json();
-        console.log('API Response:', result);
-        alert('Contraseña actualizada exitosamente');
-        closeModal('passUser');
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Hubo un error al actualizar la contraseña');
-      }
-    });
-
-    function closeModal(modalId) {
-      document.getElementById(`${modalId}-overlay`).style.display = 'none';
-      document.getElementById(`${modalId}-modal`).style.display = 'none';
+    if (!response.ok) {
+      throw new Error('Error en la solicitud');
     }
 
+    const result = await response.json();
+    console.log('API Response:', result);
+    alert('Contraseña actualizada exitosamente');
+    closeModal('passUser');
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Hubo un error al actualizar la contraseña');
+  }
+});
+
+function closeModal(modalId) {
+  document.getElementById(`${modalId}-overlay`).style.display = 'none';
+  document.getElementById(`${modalId}-modal`).style.display = 'none';
+}
   </script>
 
 
