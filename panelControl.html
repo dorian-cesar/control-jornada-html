@@ -1,38 +1,37 @@
 <body>
-<div id="pageControl">
+  <div id="pageControl">
     <div style="text-align: center;">
 
     </div>
     <div class="panelCentral">
-        <div class="dashContent">
-          <button onclick="mapa()"><i class="fa fa-map-marker fa-fw fa-5x"></i><br>Mapa</button>
-          <button onclick="estado()" ><i class="fa fa-check-square-o fa-fw fa-5x"></i><br>Estado</button>
-          <button onclick="notificaciones()"><i class="fa fa-tachometer fa-fw fa-5x"></i><br>Exceso de Velocidad</button>
-          <button onclick="perfilConductor()" ><i class="fa fa-address-card fa-fw fa-5x"></i><br>Conductores</button>    
-          <button onclick="tarjetas()"><i class="fa fa-id-card-o fa-fw fa-5x"></i><br>Tarjetas</button>
-          <button onclick="historialAct()" ><i class="fa fa-history fa-fw fa-5x"></i><br>Inicio y Termino de Jornada</button>
-          <!--<button onclick="mapaInteractivo()"><i class="fa fa-globe fa-fw fa-5x"></i> <br>Analitica BI</button>-->
-          <button onclick="vehiculo()"><i class="fa fa-bus fa-fw fa-5x"></i><br>Vehiculos</button>
-          <button onclick="empresas()" ><i class="fa fa-building fa-fw fa-5x"></i><br>Empresas</button>    
-          <button id="btnUser" onclick="usuarios()"><i class="fa fa-user-circle-o fa-fw fa-5x"></i><br>Usuarios</button>
-          <button onclick="analitica()"><i class="fa fa-line-chart fa-fw fa-5x"></i> <br>Analitica BI</button>
-      
-        </div>
-           </div>
+      <div class="dashContent">
+        <button onclick="mapa()"><i class="fa fa-map-marker fa-fw fa-5x"></i><br>Mapa</button>
+        <button onclick="estado()"><i class="fa fa-check-square-o fa-fw fa-5x"></i><br>Estado</button>
+        <button onclick="notificaciones()"><i class="fa fa-tachometer fa-fw fa-5x"></i><br>Exceso de Velocidad</button>
+        <button onclick="perfilConductor()"><i class="fa fa-address-card fa-fw fa-5x"></i><br>Conductores</button>
+        <button onclick="tarjetas()"><i class="fa fa-id-card-o fa-fw fa-5x"></i><br>Tarjetas</button>
+        <button onclick="historialAct()"><i class="fa fa-history fa-fw fa-5x"></i><br>Inicio y Termino de
+          Jornada</button>
+        <!--<button onclick="mapaInteractivo()"><i class="fa fa-globe fa-fw fa-5x"></i> <br>Analitica BI</button>-->
+        <button onclick="vehiculo()"><i class="fa fa-bus fa-fw fa-5x"></i><br>Vehiculos</button>
+        <button onclick="empresas()"><i class="fa fa-building fa-fw fa-5x"></i><br>Empresas</button>
+        <button id="btnUser" onclick="usuarios()"><i class="fa fa-user-circle-o fa-fw fa-5x"></i><br>Usuarios</button>
+        <button onclick="analitica()"><i class="fa fa-line-chart fa-fw fa-5x"></i> <br>Analitica BI</button>
+      </div>
+    </div>
+  </div>
+  <script>
 
-</div>
-<script>
+    var lvl = parseInt(localStorage.getItem('level'));
+    if (lvl < 10) {
+      var btnUser = document.getElementById('btnUser');
 
-  var lvl = parseInt(localStorage.getItem('level'));
-  if(lvl < 10){
-    var btnUser = document.getElementById('btnUser');
-
-    if(btnUser) btnUser.remove();
-
-
-  }
+      if (btnUser) btnUser.remove();
 
 
+    }
 
-</script>
+
+
+  </script>
 </body>
