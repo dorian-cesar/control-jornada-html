@@ -98,7 +98,7 @@
                 </div>
                 <div class="form-group">
                     <i>Rut</i>
-                    <input type="text" id="rut" name="rut" class="entrada" placeholder="xx.xxx.xxx-x">
+                    <input type="text" id="rutConductor" name="rut" class="entrada" placeholder="xx.xxx.xxx-x">
                 </div>
                 <div class="form-group">
                     <i>Empresa</i>
@@ -164,7 +164,7 @@
             }
 
             // Si el RUT no existe, proceder a crear el conductor
-            api.post("/openconductores", {
+            api.post("/conductores", {
                 rut: formCC.rut.value,
                 nombre: formCC.nombre.value,
                 company_id: formCC.empresa.value,
@@ -205,7 +205,7 @@
 
     async function modalEditVehiculo(idIn) {
         const form = document.getElementById('formVehiculo');
-        let conductor = await api.get(`/openconductores/${idIn}`)
+        let conductor = await api.get(`/conductores/${idIn}`)
             .then(data => {
                 return data.data[0];
             })
@@ -264,7 +264,7 @@
         $("#loadingscreen").show();
 
         try {
-            await api.put(`/openconductores/${id}`, {
+            await api.put(`/conductores/${id}`, {
                 activo: activo ? 1 : 0
             });
 
@@ -287,7 +287,7 @@
         const form = document.getElementById('formCond');
         form.empresa.textContent = "";
 
-        let cond = await api.get(`/openconductores/${idIn}`)
+        let cond = await api.get(`/conductores/${idIn}`)
             .then(data => {
                 return data.data[0];
             })
@@ -326,7 +326,7 @@
         if (validarEditarConductor()) {
             $("#loadingscreen").show(); // Mostrar pantalla de carga al inicio de la acción
 
-            api.put(`/openconductores/${formEditCond.idIn.value}`, {
+            api.put(`/conductores/${formEditCond.idIn.value}`, {
                 nombre: formEditCond.conductor.value,
                 rut: formEditCond.rut.value,
                 company_id: formEditCond.empresa.value,
@@ -360,7 +360,7 @@
 
         tableCC = $("#tableConductores").DataTable({
             "ajax": {
-                "url": baseUrl + "openconductores",
+                "url": baseUrl + "conductores",
                 "dataSrc": "",
                 "beforeSend": function (xhr) {
                     var token = localStorage.getItem("token");

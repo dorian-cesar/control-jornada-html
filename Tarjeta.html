@@ -44,7 +44,7 @@
                 <div class="form-group">
                     <input type="number" name="idIn" hidden />
                     <i>Rut:</i>
-                    <select type="text" id="rut" name="rut" class="entrada" placeholder="xx.xxx.xxx-x"
+                    <select type="text" id="rut1" name="rut1" class="entrada" placeholder="xx.xxx.xxx-x"
                         required></select>
                 </div>
                 <div>
@@ -64,7 +64,7 @@
                 <input type="number" name="idIn" hidden />
                 <div class="form-group">
                     <i>Rut:</i>
-                    <select id="rut" name="rut" class="entrada" placeholder="xx.xxx.xxx-x"></select>
+                    <select id="rut2" name="rut" class="entrada" placeholder="xx.xxx.xxx-x"></select>
                 </div>
                 <div>
                     <button class="btnCrear" name="btnSubmit"><i class="fa fa-floppy-o"></i> Guardar</button>
@@ -177,15 +177,17 @@
         });
         openModal('ascTarjeta');
     }
+
+    
     var tableTar;
     const formTar = document.getElementById("formAsociarT");
-    var rut = formTar.rut.value;
+    var rut1 = formTar.rut1.value;
     formTar.addEventListener("submit", (e) => {
         e.preventDefault();
         if (validarTarjeta()) {
             api.put(`/smartcards/${formTar.idIn.value}`, {
                 id: formTar.idIn.value,
-                driver_id: formTar.rut.value,
+                driver_id: formTar.rut1.value,
             })
 
                 .then(data => {
@@ -227,15 +229,15 @@
             .catch(error => {
                 console.error(error);
             })
-        form.rut.textContent = "";
+        form.rut2.textContent = "";
 
         listCond.forEach(element => {
             console.log(element);
             if (!element.smartcard_id || element.smartcard_id == tarjeta.id) {
                 const optcond = document.createElement("option");
                 optcond.value = element.id;
-                optcond.textContent = element.rut;
-                form.rut.appendChild(optcond);
+                optcond.textContent = element.rut2;
+                form.rut2.appendChild(optcond);
             }
 
 
@@ -243,19 +245,21 @@
         if (tarjeta.driver) {
             console.log(tarjeta);
 
-            form.rut.value = tarjeta.driver.id;
+            form.rut2.value = tarjeta.driver.id;
 
         }
 
         form.idIn.value = tarjeta.id;
         openModal('editarTarjeta');
     }
+
+
     var tableEditTar;
     const formEditTar = document.getElementById("formEditar");
     formEditTar.addEventListener("submit", (e) => {
         e.preventDefault();
         api.put(`/smartcards/${formEditTar.idIn.value}`, {
-            driver_id: formEditTar.rut.value,
+            driver_id: formEditTar.rut2.value,
 
 
         })

@@ -1,224 +1,116 @@
-<style>
-    .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-family: Arial, sans-serif;
-    }
 
-    #pageVelocidad {
-        text-align: center;
-        width: 100%;
-    }
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+        }
 
-    .panelCentral,
-    .btn-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 20px;
-    }
+        #pageVelocidad {
+            text-align: center;
+            width: 100%;
+        }
 
-    .form-info,
-    .content-date {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 10px;
-    }
+        .panelCentral,
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-    .form-info>*,
-    .content-date>* {
-        margin-right: 10px;
-    }
+        .form-info,
+        .content-date {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
 
-    .btnCrear {
-        text-align: center;
-        margin-right: 10px;
-        margin-bottom: 10px;
-    }
+        .form-info > *,
+        .content-date > * {
+            margin-right: 10px;
+        }
 
-    .redir {
-        display: flex;
-        justify-content: flex-start;
-        width: 100%;
-        margin-bottom: 20px;
-    }
+        .btnCrear {
+            text-align: center;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
 
-    .table-container {
-        width: 80%;
-        margin: 0 auto;
-    }
-</style>
+        .redir {
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-<div class="container">
-    <div id="pageVelocidad">
-        <div>
-            <h1>Informe de velocidad</h1>
-        </div>
-        <div class="redir">
-            <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atrás </i>
-        </div>
-        <div class="panelCentral">
-            <div class="form-info">
-                <i>Tipo:</i>
-                <select class="sel-infoGen" required name="tipo" id="tipo">
-                    <option value="">Seleccione Tipo</option>
-                </select>
-                <i>Filtro:</i>
-                <select class="sel-infoGen" required name="filtro" id="filtro">
-                    <option value="">Seleccione Filtro</option>
-                </select>
+        .table-container {
+            width: 80%;
+            margin: 0 auto;
+        }
+    </style>
+
+    <div class="container">
+        <div id="pageVelocidad">
+            <div>
+                <h1>Informe de velocidad</h1>
             </div>
-            <div class="content-date">
-                <i>Desde:</i>
-                <input type="date" class="sel-infoGen" name="inicio" id="fecha-desde">
-                <i>&nbsp;Hasta:</i>
-                <input type="date" class="sel-infoGen" name="termino" id="fecha-hasta">
+            <div class="redir">
+                <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atrás </i>
             </div>
-            <div class="form-info">
-                <i>Velocidad desde:</i>
-                <select class="sel-infoGen" required name="velocidad" id="velocidad">
-                    <option value="">Seleccione velocidad:</option>
-                    <option value="0-49">0 a 49 km/h</option>
-                    <option value="50-100">50 a 100 km/h</option>
-                    <option value="100+">> 100 km/h</option>
-                </select>
-                <button class="btnCrear" id="buscar">Buscar</button>
+            <div class="panelCentral">
+                <div class="form-info">
+                    <i>Tipo:</i>
+                    <select class="sel-infoGen" required name="tipo" id="tipo">
+                        <option value="">Seleccione Tipo</option>
+                    </select>
+                    <i>Filtro:</i>
+                    <select class="sel-infoGen" required name="filtro" id="filtro">
+                        <option value="">Seleccione Filtro</option>
+                    </select>
+                </div>
+                <div class="content-date">
+                    <i>Desde:</i>
+                    <input type="date" class="sel-infoGen" name="inicio" id="fecha-desde">
+                    <i>&nbsp;Hasta:</i>
+                    <input type="date" class="sel-infoGen" name="termino" id="fecha-hasta">
+                </div>
+                <div class="form-info">
+                    <i>Velocidad desde:</i>
+                    <select class="sel-infoGen" required name="velocidad" id="velocidad">
+                        <option value="">Seleccione velocidad:</option>
+                        <option value="0-49">0 a 49 km/h</option>
+                        <option value="50-100">50 a 100 km/h</option>
+                        <option value="100+">> 100 km/h</option>
+                    </select>
+                    <button class="btnCrear" id="buscar">Buscar</button>
+                </div>
             </div>
-        </div>
-        <div>
-            <button class="btnCrear">PDF <i class="fa fa-download"></i></button>
-            <button class="btnCrear">Excel <i class="fa fa-download"></i></button>
-        </div>
-        <div id="tablaContainer" class="table-container">
-            <table id="tablaInforme" class="display table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre Conductor</th>
-                        <th>Patente</th>
-                        <th>Fecha</th>
-                        <th>Velocidad</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+            <div>
+                <button class="btnCrear">PDF <i class="fa fa-download"></i></button>
+                <button class="btnCrear">Excel <i class="fa fa-download"></i></button>
+            </div>
+            <div id="tablaContainer" class="table-container">
+                <table id="tablaInforme" class="display table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre Conductor</th>
+                            <th>Patente</th>
+                            <th>Fecha</th>
+                            <th>Velocidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
+   
+    </script>
 
-<script>
-    $(document).ready(function () {
-
-        // Inicializar DataTables
-        var tabla = $('#tablaInforme').DataTable();
-        const api = getApi();
-        const baseUrl = api.baseUrl;
-        // Función para cargar los conductores desde la API y llenar el select de tipo
-        function cargarConductores() {
-            $.ajax({
-                url: baseUrl + 'conductores',
-                type: 'GET',
-                success: function (data) {
-                    // Llenar el select de tipo con los nombres de los conductores
-                    var tipoSelect = $('#tipo');
-                    tipoSelect.empty();
-                    tipoSelect.append($('<option>', {
-                        value: '',
-                        text: 'Seleccione Tipo'
-                    }));
-                    $.each(data, function (index, conductor) {
-                        tipoSelect.append($('<option>', {
-                            value: conductor.id,
-                            text: conductor.nombre
-                        }));
-                    });
-                },
-                error: function (error) {
-                    console.log('Error al cargar conductores desde la API');
-                }
-            });
-        }
-
-        // Función para cargar las patentes desde la API y llenar el select de filtro
-        function cargarPatentes() {
-            const api = getApi();
-            const baseUrl = api.baseUrl;
-            $.ajax({
-                url: baseUrl + 'openconductores',
-                type: 'GET',
-                success: function (data) {
-                    // Llenar el select de filtro con las patentes
-                    var filtroSelect = $('#filtro');
-                    filtroSelect.empty();
-                    filtroSelect.append($('<option>', {
-                        value: '',
-                        text: 'Seleccione Filtro'
-                    }));
-                    $.each(data, function (index, conductor) {
-                        filtroSelect.append($('<option>', {
-                            value: conductor.vehicle.patente,
-                            text: conductor.vehicle.patente
-                        }));
-                    });
-                },
-                error: function (error) {
-                    console.log('Error al cargar patentes desde la API');
-                }
-            });
-        }
-
-        // Función para filtrar los datos del conductor seleccionado y otras opciones
-        function filtrarDatos() {
-            var idConductor = $('#tipo').val();
-            var patente = $('#filtro').val();
-            var fechaDesde = $('#fecha-desde').val();
-            var fechaHasta = $('#fecha-hasta').val();
-            var velocidad = $('#velocidad').val();
-            const api = getApi();
-            const baseUrl = api.baseUrl;
-            $.ajax({
-                url: baseUrl+`openconductores/${idConductor}`,
-                type: 'GET',
-                success: function (data) {
-                    // Limpiar la tabla
-                    tabla.clear();
-
-                    // Añadir los datos filtrados a la tabla
-                    $.each(data.registros, function (index, registro) {
-                        if ((!patente || registro.patente === patente) &&
-                            (!fechaDesde || registro.fecha >= fechaDesde) &&
-                            (!fechaHasta || registro.fecha <= fechaHasta) &&
-                            (!velocidad || (velocidad === '0-49' && registro.velocidad <= 49) ||
-                                (velocidad === '50-100' && registro.velocidad > 49 && registro.velocidad <= 100) ||
-                                (velocidad === '100+' && registro.velocidad > 100))) {
-                            tabla.row.add([
-                                registro.id,
-                                data.nombre,
-                                registro.patente,
-                                registro.fecha,
-                                registro.velocidad
-                            ]).draw();
-                        }
-                    });
-                },
-                error: function (error) {
-                    console.log('Error al filtrar datos del conductor');
-                }
-            });
-        }
-
-        // Evento cuando se hace clic en el botón Buscar
-        $('#buscar').click(function () {
-            filtrarDatos();
-        });
-
-        // Cargar conductores y patentes al cargar la página
-        cargarConductores();
-        cargarPatentes();
-    });
-</script>
