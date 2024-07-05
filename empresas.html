@@ -220,21 +220,32 @@
         return true;
     }
 
-    function eliminarRegistro(id) {
-        if (confirm('¿Estás seguro de que deseas eliminar esta empresa?')) {
+    function eliminarRegistro(id, nombre) {
+        const api = getApi();
+        const baseUrl = api.baseUrl;
+
+        if (confirm(`¿Está seguro que desea eliminar la empresa ${nombre}?`)) {
+            var token = localStorage.getItem("token");
+
+            // Mostrar la pantalla de carga antes de eliminar la empresa
+            $("#loadingscreen").show();
+
             $.ajax({
                 url: baseUrl + `empresas/${id}`,
                 type: 'DELETE',
                 beforeSend: function (xhr) {
-                    var token = localStorage.getItem("token");
                     xhr.setRequestHeader('Authorization', 'Bearer ' + token);
                 },
-                success: function (data) {
-                    tableEmp.ajax.reload();
+                success: function (result) {
+                    alert('Empresa eliminada exitosamente.');
+                    tableEmp.ajax.reload();  // Recargar la tabla de datos
                 },
                 error: function (xhr, status, error) {
-                    console.error('Error al eliminar empresa:', error);
-                    alert('Error al eliminar empresa.');
+                    alert('Ocurrió un error al eliminar la empresa: ' + error);
+                },
+                complete: function () {
+                    // Ocultar la pantalla de carga después de completar la solicitud
+                    $("#loadingscreen").hide();
                 }
             });
         }
