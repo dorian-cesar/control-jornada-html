@@ -1,31 +1,25 @@
 <div id="pageAnalitica">
     <div style="text-align: center;">
         <h1>Analitica BI <i class="fa fa-line-chart"></i></h1>
+        <h2>(Inicio y Termino de Jornada)</h2>
+        <div class="btnActualizar">
+        </div>
+        <button class="btnCrear"  onclick="actualizarPaginaAnalitica()">Actualizar</button>
         <div class="redir margin-left: 30px ">
             <i class="fa fa-arrow-circle-left" onclick="panelControl()"> Atras </i>
-            <div>
-                <button class="btnCrear" id="btnCrear" onclick="actualizarPaginaAnalitica()">Actualizarr</button>
-            </div>
         </div>
-
-        <div class="frame">
-            <iframe width="1300" height="800" id="myIframe"
+        <div class="frame" style="margin-bottom: 60px;">
+            <iframe width="1400" height="800" id="myIframe"
                 src="https://lookerstudio.google.com/embed/reporting/477b95a3-4675-415d-a8a2-53589fdf0ad4/page/DPZ4D"
                 frameborder="0" style="border:0" allowfullscreen
                 sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
         </div>
-
     </div>
-    <style>
-
-    </style>
+    
     <script>
-
         function actualizarPaginaAnalitica() {
-            var newUrl = 'https://lookerstudio.google.com/embed/reporting/477b95a3-4675-415d-a8a2-53589fdf0ad4/page/DPZ4D'
-
+            var newUrl = 'https://lookerstudio.google.com/embed/reporting/477b95a3-4675-415d-a8a2-53589fdf0ad4/page/DPZ4D';
             $('#myIframe').attr('src', newUrl);
         }
-
-
     </script>
+</div>
