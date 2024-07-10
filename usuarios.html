@@ -116,7 +116,7 @@
                         if (error.response) {
                             switch (error.response.status) {
                                 case 422:
-                                    window.alert("Este Usuario ya existe ")
+                                    window.alert("El password debe tener minimo 8 caracteres")
                             }
                         }
                     })
@@ -197,6 +197,7 @@
             });
         });
 
+        const baseUrl = api.baseUrl;
         function eliminarUsuario(id, name) {
             if (confirm(`¿Está seguro que desea eliminar el usuario ${name}?`)) {
                 var token = localStorage.getItem("token");
@@ -217,7 +218,7 @@
             }
         }
 
-        /*function eliminarUsuario(id) {
+        function eliminarUsuario(id) {
             if (confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
                 console.log(`Intentando eliminar el usuario con id: ${id}`); // Log de depuración
                 $.ajax({
@@ -239,7 +240,7 @@
                     }
                 });
             }
-        }*/
+        }
 
 
 
